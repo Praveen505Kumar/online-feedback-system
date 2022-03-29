@@ -1,0 +1,30 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    background-size: cover;
+}
+.footer{
+    margin-top: 11rem;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+a:hover{
+    color: blue;
+}
+.cards{
+    background-color: rgba(225, 225, 225,0.3);
+}
+.names {
+    color: rgb(10, 10, 10);
+    font-weight: 500;
+}
+.sb-btn {
+    color: rgb(10, 10, 10);
+    font-weight: 500;
+}
+.content {
+    margin: 7rem auto;
+}
