@@ -27,7 +27,7 @@
     <!-- place this link after bootstrap links to work properly -->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
-<body style="background-image: url('images/college_image.jpg');">
+<body style="background-image: url('images/college_image.jpg'); background-size:cover;">
     <nav class="navbar navbar-light sticky-top dontprint" style=" background-image: linear-gradient(#2CE558, #2DCF8C);">
         <div class="">
             <div class="row px-5">

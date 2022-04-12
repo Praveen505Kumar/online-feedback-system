@@ -1,9 +1,9 @@
 <?php
     session_start();
 	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']="admin"){
-	    require('adminheader.php');
+	    require('header.php');
     }
-    $_SESSION['branch'] = "all";
+    
     if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
 			
         if(!empty($_POST)){
@@ -18,7 +18,7 @@
     }
 ?>
 <div class="row">
-    <div class="col-5" style="max-width:400px;">
+    <div class="col-5 mt-3" style="max-width:400px;">
         <div class="list-group">
                 <?php
                     $menu_id = 1;
@@ -64,14 +64,13 @@
             </div>
             
         </div>
-        <?php 
-require('footer.php');
-
-?>
+    
     </div>
     
 </div>
-
+<?php 
+    require('footer.php');
+?>
 
 
 
