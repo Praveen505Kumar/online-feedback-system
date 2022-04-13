@@ -1,4 +1,4 @@
-<div class="footer dontprint">
+<div class="footer dontprint m-0">
   <div class="container">
     <br />
     <p class="text-center"> 
