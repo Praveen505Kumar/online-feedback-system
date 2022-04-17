@@ -6,7 +6,7 @@
             echo "class='list-group-item'"; 
         }
     ?>
->Home</a>                
+>Home (<?php echo $_SESSION['branch'];?>)</a>                
 <a href="activate_fb.php" 
     <?php 
 		if(!empty($menu_id) && $menu_id==2){ 

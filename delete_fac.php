@@ -73,26 +73,26 @@
                 ?>
             </div>
             
-            <div class="card cards content text-center" style="max-width:400px;">
+            <div class="card cards content text-center" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Remove Faculty</div>
                 <div class="card-body">
                     <form action="delete_fac.php" method="post">
-                        <div class="mb-3 input-group justify-content-center">
-                            <label for="fac" style="font-weight: bold;">Select Faculty Name : &emsp; </label>
-                            <select name="fname" id="fac" required>
-                                <option value="">--Select faculty--</option>
-                                <?php
-                                    for($i=0;$i < sizeof($faculties);$i++){
-                                        echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
-                                    }
-                                ?>
-
-                                        
-                            </select>
+                        <div class="mb-3 row">
+                            <label class="col-sm-5 col-form-label" for="fac" style="font-weight: bold;">Select Faculty Name: &emsp;</label>
+                            <div class="col-sm-6">
+                                <select class="form-select" name="fname" id="fac" required>
+                                    <option value="">--Select faculty--</option>
+                                    <?php
+                                        for($i=0;$i < sizeof($faculties);$i++){
+                                            echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
+                                        }
+                                    ?>       
+                                </select>
+                            </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary sb-btn">Delete</button>
+                        <button type="submit" class="btn btn-primary sb-btn px-5">Delete</button>
                     </form>
                     <?php
                         if($msg=="success"){

@@ -2,39 +2,38 @@
     @session_start();
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
         require('header.php');
-    }
-    if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-        if(!empty($_POST['rollno'])){
-            require("config/db_connect.php");
-            
-            $roll = strtoupper($_POST['rollno']);
-            if(!empty($conn)){
-                if($stmt=$conn->prepare("SELECT  email,spass FROM `st_login` WHERE `sid`=?")){
-                    $stmt->bind_param("s", $roll);
-                    $stmt->execute();
-                    $stmt->bind_result($email, $pass);
-                    
-                    $stmt->fetch();
-                    if(empty($email)){
-                        $msg = 'no_roll';
-                    }else if($roll == $pass){
-                        $msg = "pwd_chngd";
-                    }else{
+        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
+            if(!empty($_POST['rollno'])){
+                require("config/db_connect.php");
+                
+                $roll = strtoupper($_POST['rollno']);
+                if(!empty($conn)){
+                    if($stmt=$conn->prepare("SELECT  email,spass FROM `st_login` WHERE `sid`=?")){
+                        $stmt->bind_param("s", $roll);
+                        $stmt->execute();
+                        $stmt->bind_result($email, $pass);
                         
-                        $stmt->close();
-                        
-                        if($stmt=$conn->prepare("UPDATE `st_login` SET `spass`=? WHERE `sid`=?")){
+                        $stmt->fetch();
+                        if(empty($email)){
+                            $msg = 'no_roll';
+                        }else if($roll == $pass){
+                            $msg = "pwd_chngd";
+                        }else{
                             
-                            $stmt->bind_param("ss", $roll, $roll);
-                            if($stmt->execute()){
-                                $msg = "pwd_chngd";
+                            $stmt->close();
+                            
+                            if($stmt=$conn->prepare("UPDATE `st_login` SET `spass`=? WHERE `sid`=?")){
+                                
+                                $stmt->bind_param("ss", $roll, $roll);
+                                if($stmt->execute()){
+                                    $msg = "pwd_chngd";
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -65,7 +64,7 @@
                 <div class="card-body">
                     <form action="pwdreset.php" method="post">
                         <div class="form-group ">
-                            <label for="rollno" style="font-weight: bold;">Enter UserName/Roll_No</label>
+                            <label for="rollno" class="col-form-label" style="font-weight: bold;">Enter UserName/Roll_No</label>
                             <br/><br/>
                             <input type="text" name="rollno" class="form-control" id="rollno" placeholder="Enter roll number" required>
                         </div>
@@ -93,5 +92,6 @@
 </div>
 
 <?php 
-    require('footer.php');
+        require('footer.php');
+    }
 ?>
