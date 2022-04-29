@@ -1,53 +1,22 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
         require('header.php');
-    
         if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
             require("config/db_connect.php");
-            if(!empty($_POST['fname'])){
-                
-                $fac=$_POST['fname'];
-                if(!empty($conn)){
-                    //For delete faculty
-                    if($stmt=$conn->prepare("DELETE FROM `fac_login` WHERE `fname`=?;")){
-                        
-                        $stmt->bind_param("s", $fac);
-                        if($stmt->execute()){
-                            $msg="success";
-                        }
-                        else{
-                            $msg="failure";
-                        }
-                        $stmt->close();
+            // getting regulations
+            if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
+                if($stmt->execute()){
+                    $stmt->bind_result($reg);
+                    $i=0;
+                    $regulation = array();
+                    while($stmt->fetch()){
+                        $regulation[$i]=$reg;
+                        $i++;
                     }
-                    
-
                 }
             }
             
-            //getting the list
-            $br=$_SESSION['br'];
-            $faculties=array();
-            if(!empty($conn)){
-                
-                if($stmt=$conn->prepare("SELECT DISTINCT `fname` FROM `fac_login` WHERE `br_code`=? AND `privilege` LIKE '%staff%'; ")){
-                    
-                    $stmt->bind_param("s", $br);
-                    
-                    if($stmt->execute()){
-                        
-                        $stmt->bind_result($fac);
-                        $i=0;
-                        
-                        while($stmt->fetch()){
-                            $faculties[$i]=$fac;
-                            $i++;
-                        }
-                    }
-                    $stmt->close();
-                }
-            }
         }
 ?>
 <div class="container ms-0">
@@ -72,101 +41,106 @@
                     echo "</h4>";
                 ?>
             </div>
-            
+            <div class="container text-center">
+                <?php
+                    if(!empty($_GET['msg']) && $_GET['msg']=='feedback_activated'){
+                        echo "<div class='alert alert-success'>Feedback Activated Successfully</div>";
+                    }
+                    else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_not_activated'){
+                        echo "<div class='alert alert-danger'>Feedback Not Activated..!</div>";
+                    }else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_exists'){
+                        echo "<div class='alert alert-warning'>Feedback Exists..!</div>";
+                    }else if(!empty($_GET['msg']) && $_GET['msg']=='start_end_time_error'){
+                        echo "<div class='alert alert-warning'>From DateTime Value > To DateTime Value..!</div>";
+                    }else if(!empty($_GET['msg']) && $_GET['msg']=='end_time_error'){
+                        echo "<div class='alert alert-warning'>To DateTime Value is Invalid/Expired..!</div>";
+                    }
+                ?>
+            </div>
             <div class="card cards content text-center mt-5" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Select The Following</div>
                 <div class="card-body">
-                    <form action="delete_fac.php" method="post">
-                        <div class="mb-3 input-group justify-content-center">
+                    <form action="active.php" roll="form" method="post">
+                        <div class="mb-3">
                             <div class="mb-3 row">
-                                <label class="col-sm-5 col-form-label" for="inputPassword" >Select Regulation : &emsp;</label>
-                                <div class="col-sm-6">
-                                    <select class="form-select" name="fname" id="fac" required>
-                                        <option class="text-center" value="">--Select--</option>
+                                <label class="col-sm-6 col-form-label" style="font-weight: bold;" for="reg">Select Regulation&emsp;:&emsp;</label>
+                                <div class="col-sm-6 ">
+                                    <select class="form-select text-center" name="regulation" id="reg" required>
+                                        <option value="">Select</option>
                                         <?php
-                                            for($i=0;$i < sizeof($faculties);$i++){
-                                                echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
+                                            for($i=0;$i < sizeof($regulation);$i++){
+                                                echo "<option value='".$regulation[$i]."'>".$regulation[$i]."</option>";
                                             }
                                         ?>        
                                 </select>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label class="col-sm-6 col-form-label" for="inputPassword" style="font-weight: bold;">Select Specialization : &emsp;</label>
+                            <div class="mb-4 row">
+                                <label class="col-sm-6 col-form-label" style="font-weight: bold;" for="year" >Select Year&emsp;:&emsp;</label>
                                 <div class="col-sm-6">
-                                    <select class="form-select" name="fname" id="fac" required>
-                                        <option class="text-center" value="">--Select--</option>
-                                        <?php
-                                            for($i=0;$i < sizeof($faculties);$i++){
-                                                echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
-                                            }
-                                        ?>        
+                                    <select class="form-select text-center" name="year" id="year" required>
+                                        <option value="">Select</option>
+                                        <option value="I">I</option>
+                                        <option value="II">II</option>
+                                        <option value="III">III</option>
+                                        <option value="IV">IV</option>    
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label class="col-sm-6 col-form-label" for="inputPassword" >Select Year : &emsp;</label>
+                            <div class="mb-4 row">
+                                <label class="col-sm-6 col-form-label" for="sem" style="font-weight: bold;">Select Semester&emsp;:&emsp;</label>
                                 <div class="col-sm-6">
-                                    <select class="form-select" name="fname" id="fac" required>
-                                        <option class="text-center" value="">--Select--</option>
-                                        <?php
-                                            for($i=0;$i < sizeof($faculties);$i++){
-                                                echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
-                                            }
-                                        ?>        
+                                    <select class="form-select text-center" name="sem" id="sem" required>
+                                        <option value="">Select</option>
+                                        <option value="I">I</option>
+                                        <option value="II">II</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label class="col-sm-6 col-form-label" for="inputPassword" style="font-weight: bold;">Select Semester : &emsp;</label>
+                            <div class="mb-4 row">
+                                <label class="col-sm-6 col-form-label" for="fdtime" style="font-weight: bold;">Select Feedback Time&emsp;:&emsp;</label>
                                 <div class="col-sm-6">
-                                    <select class="form-select" name="fname" id="fac" required>
-                                        <option class="text-center" value="">--Select--</option>
-                                        <?php
-                                            for($i=0;$i < sizeof($faculties);$i++){
-                                                echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
-                                            }
-                                        ?>        
+                                    <select class="form-select text-center" name="fdtime" id="fdtime" required>
+                                        <option value="">Select</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label class="col-sm-6 col-form-label" for="inputPassword" style="font-weight: bold;">Select Feedback Time : &emsp;</label>
-                                <div class="col-sm-6">
-                                    <select class="form-select" name="fname" id="fac" required>
-                                        <option class="text-center" value="">--Select--</option>
-                                        <?php
-                                            for($i=0;$i < sizeof($faculties);$i++){
-                                                echo "<option value='".$faculties[$i]."'>".$faculties[$i]."</option>";
-                                            }
-                                        ?>        
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            
                         </div>
                         
-                        <button type="submit" class="btn btn-primary sb-btn px-5">Activate</button>
+                        <button type="submit" class="btn btn-primary sb-btn px-5">Get Report</button>
                     </form>
-                    <?php
-                        if($msg=="success"){
-                            echo '<br /><div class="alert alert-success" role="alert">Faculty Details Deleted..!</div>';
-                        }
-                        if($msg=="failure"){
-                            echo '<br /><div class="alert alert-danger" role="alert">Faculty Details Not Deleted..!</div>';
-                        }	
-                       
-                    ?>
                 </div>
-                
             </div>
-    
         </div>
         
     </div>
 </div>
+<script>
+    $(document).ready(function(){
+        $("#reg").change(function(){
+            $("#year").val('');
+            $("#sem").val('');
+        });
+        $("#year").change(function(){
+            $("#sem").val('');
+        });
+        $("#sem").change(function(){
+            var _reg = $("#reg").val();
+            var _year = $("#year").val();
+            var _sem = $("#sem").val();
+            $.ajax({
+                url:"config/ajaxreport.php",
+                method:"POST",
+                data:{reg:_reg, year:_year, sem:_sem},
+                dataType:"text",
+                success:function(data){
+                    $("#fdtime").html(data);
+                }
+            });
+        });
+    });
+</script>
 
 <?php 
         require('footer.php');

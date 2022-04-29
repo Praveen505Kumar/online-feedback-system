@@ -8,8 +8,9 @@
 }
 
 a {
+    color: rgb(19, 18, 18);
     text-decoration: none;
-    color: black;
+
 }
 
 a:hover {

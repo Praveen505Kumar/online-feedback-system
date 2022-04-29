@@ -14,6 +14,20 @@
                 $_SESSION['branch'] = $br[1];
             }
         }
+        // getting departments
+        require("config/db_connect.php");
+        if($stmt = $conn->prepare("SELECT DISTINCT `branch` FROM `fac_login` ORDER BY `br_code`;")){
+            if($stmt->execute()){
+                $stmt->bind_result($branch);
+                $i=0;
+                $branches = array();
+                while($stmt->fetch()){
+                    if($branch != "HMS")
+                        $branches[$i]=$branch;
+                    $i++;
+                }
+            }
+        }
         
     }
 ?>
@@ -47,16 +61,15 @@
                 </div>
                 <div class="card-body">
                     <form action="admin.php" method="post">
-                        <div class="mb-3 input-group justify-content-center">
+                        <div class="mb-3 input-group justify-content-center text-center">
                             <select name="dept" required>
                                         <option value="">--Select Department--</option>
-                                        <option value="01|CIVIL">CIVIL</option>
-                                        <option value="02|EEE">EEE</option>
-                                        <option value="03|MECH">MECH</option>
-                                        <option value="04|ECE">ECE</option>
-                                        <option value="05|CSE">CSE</option>
-                                        <option value="27|FDT">FOOD TECH</option>
-                                        
+                                        <?php
+                                            foreach($branches as $branch){
+                                                echo '<option value="'.$branch.'">'.$branch.'</option>';
+                                            } 
+                                        ?>
+                                    
                             </select>
                         </div>
                         

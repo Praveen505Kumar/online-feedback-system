@@ -1,0 +1,11 @@
+@page {
+    size: 13in 9in;
+}
+
+/* 
+@media print {
+    table {
+        font-size: 1.5rem;
+        size: 15in;
+    }
+} */

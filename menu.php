@@ -92,16 +92,7 @@
 
 >Individual Report</a>
 
- 
-<?php
-    if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-        if(!empty($menu_id) && $menu_id==12){
-            echo '<a href="writ_fb.php" class="list-group-item active" >Individual Written Feedback</a>';
-        }else{
-            echo '<a href="writ_fb.php" class="list-group-item" >Individual Written Feedback</a>';
-        }
-    }
-?>
+
 
 <a href="chg_pwd.php"
     <?php 

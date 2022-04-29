@@ -4,16 +4,32 @@
         require('header.php');
         require('config/db_connect.php');
         date_default_timezone_set("Asia/Kolkata");
-        $today = date("Y-m-d\TH:i",time());
+        if(!empty($_POST['feed_id'])){
+            $today = date("Y-m-d\TH:i", time()-100);
+            $feed_id = $_POST['feed_id'];
+            $br_code = $_SESSION['br_code'];
+            if ($stmt = $conn->prepare("UPDATE `activation` SET `to_date`=? WHERE `id`=? AND `branch`=?;")) {
+                $stmt->bind_param("sds", $today, $feed_id, $br_code);
+                if($stmt->execute()){
+                    if($conn->affected_rows){
+                        $msg = "feed_deactive";
+                    }
+                }
+                $stmt->close();
+            }
+
+        }
         if(!empty($conn)){
             $br_code = $_SESSION['br_code'];
-            if ($stmt = $conn->prepare("SELECT regulation, year, sem, from_date, to_date FROM `activation` WHERE branch=? ORDER BY from_date;")) {
+            $today = date("Y-m-d\TH:i",time());
+            if ($stmt = $conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE branch=? ORDER BY from_date;")) {
                 $stmt->bind_param("s",$br_code);
                 if($stmt->execute()){
-                    $stmt->bind_result($reg, $year, $sem, $from_date, $to_date);
+                    $stmt->bind_result($feed_id, $reg, $year, $sem, $from_date, $to_date);
                     $i = 0;
                     $feedbacks = array();
                     while ($stmt->fetch()) {
+                        $feedbacks[$i]['feed_id'] = $feed_id;
                         $feedbacks[$i]['reg'] = $reg;
                         $feedbacks[$i]['year'] = $year;
                         $feedbacks[$i]['sem'] = $sem;
@@ -22,14 +38,16 @@
                         $i++;
                     }
                 }
+                $stmt->close();
             }
         }
+        
 
     
 ?>
-<div class="container ms-0">
-    <div class="row">
-        <div class="col-5 mt-3 me-5" style="max-width:400px;">
+<div class="mx-2">
+    <div class="row mx-0">
+        <div class="col-5 mt-3 me-2" style="max-width:400px;">
             <div class="list-group">
                     <?php
                         $menu_id = 3;
@@ -37,7 +55,7 @@
                     ?>
             </div>
         </div>
-        <div class="col-7 ms-3 my-2">
+        <div class="col-8 ms-1 my-2">
             <div class="container text-center">
                 <?php
                     echo "<h4>Selected Department: &emsp;";
@@ -47,9 +65,12 @@
                         echo $_SESSION['branch'];
                     }
                     echo "</h4>";
+                    if($msg=="feed_deactive"){
+                        echo "<div class='alert alert-success'>Feedback Deactivated..!</div>";
+                    }
                 ?>
             </div>
-            <div class="table-responsive">
+            <div class="">
                 <table class="table table-danger table-hover  border-success text-center">
                     <thead>
                         <tr>
@@ -68,20 +89,30 @@
                             $i = 1;
                             foreach($feedbacks as $feedback){
                                 if(!empty($feedback['from_date']) && !empty($feedback['to_date']) && $feedback['from_date'] <= $today && $today <= $feedback['to_date']){
-                                    $status = '<span class="text-success">Active</span>';
+                                    $status = ' <div class="row">
+                                                    <div class="col-5">
+                                                        <span class="text-success">Active</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <form action="show_activ_fb.php" method="POST">
+                                                            <input type="hidden" name="feed_id" value="'.$feedback['feed_id'].'"/>
+                                                            <button  type="submit" class="btn btn-sm btn-danger px-3" name="stop_feed" >Stop</button>
+                                                        </form>
+                                                    </div>
+                                                </div>';
                                 }else{
                                     $status = '<span class="text-default">Completed</span>';
                                 }
                                 ?>
                                 <tr>
-                                    <th scope="row"><?php echo $i++ ?></th>
+                                    <th scope="row"><?php echo $i++; ?></th>
                                     <td>B.Tech</td>
-                                    <td><?php echo $feedback['reg'] ?></td>
-                                    <td><?php echo $feedback['year'] ?></td>
-                                    <td><?php echo $feedback['sem'] ?></td>
-                                    <td><?php echo $feedback['from_date'] ?></td>
-                                    <td><?php echo $feedback['to_date'] ?></td>
-                                    <td><?php echo $status?></td>
+                                    <td><?php echo $feedback['reg']; ?></td>
+                                    <td><?php echo $feedback['year']; ?></td>
+                                    <td><?php echo $feedback['sem']; ?></td>
+                                    <td><?php echo $feedback['from_date']; ?></td>
+                                    <td><?php echo $feedback['to_date']; ?></td>
+                                    <td><?php echo $status; ?></td>
                                 </tr>
                         <?php } ?>
                     </tbody>
