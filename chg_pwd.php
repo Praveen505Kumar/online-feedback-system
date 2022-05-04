@@ -37,28 +37,35 @@
                 }
             }
         }
-    }
+    
 ?>
 <div class="container ms-0">
     <div class="row">
         <div class="col-5 mt-3 me-5" style="max-width:400px;">
             <div class="list-group">
                     <?php
-                        $menu_id = 13;
-                        require_once("menu.php");
+                        if($_SESSION['priv'] == "admin"){
+                            $menu_id = 13;
+                            require_once("menu.php");
+                        }else{
+                            $menu_id = 2;
+                            require_once("facmenu.php");
+                        }
                     ?>
             </div>
         </div>
         <div class="col-7 mx-5 my-2">
             <div class="container text-center">
                 <?php
-                    echo "<h4>Selected Department: &emsp;";
-                    if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
-                        echo "None";
-                    }else{
-                        echo $_SESSION['branch'];
+                    if($_SESSION['priv'] == "admin"){
+                        echo "<h4>Selected Department: &emsp;";
+                        if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
+                            echo "None";
+                        }else{
+                            echo $_SESSION['branch'];
+                        }
+                        echo "</h4>";
                     }
-                    echo "</h4>";
                 ?>
             </div>
             
@@ -107,5 +114,8 @@
 </div>
 
 <?php 
-    require('footer.php');
+        require('footer.php');
+    }else{
+        header('Location: index.php');
+    }
 ?>

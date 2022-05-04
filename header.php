@@ -29,20 +29,20 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/print.css" media="print">
 </head>
-<body class="" style="background-image: url('images/college_image.jpg'); background-size:cover;">
+<body class="" style="background-image: url('images/college_image.jpg'); background-size:cover; background-repeat: no-repeat;">
     <nav class="navbar navbar-light sticky-top d-print-none" style=" background-image: linear-gradient(#2CE558, #2DCF8C);">
         <div class="">
             <div class="row px-5">
                 <div class="col-md-1">
                     <img  class="img-fluid" src="images/jntua.png" alt="Image" >
                 </div>
-                <div class="col-md-5 mx-0 container-fluid p-0">
+                <div class="col-md-5 mx-0 container-fluid p-0 text-center pt-4">
                     <span class="navbar-brand">JAWAHARLAL NEHRU TECHNOLOGICAL UNIVERSITY ANANTAPUR <br />
                         COLLEGE OF ENGINEERING KALIKIRI
                     </span>
                 </div>
-                <div class="col-md-5 text-center pt-3 ms-2 px-2">
-                    <p class="fs-3" style="font-size:0.5srem;">ONLINE STUDENT FEEDBACK SYSTEM</p>
+                <div class="col-md-5 pt-4 pb-3 ms-5 px-5 text-center">
+                    <h2 class="fs-3" style="font-size:0.5rem;">ONLINE STUDENT FEEDBACK SYSTEM</h2>
                 </div>
             </div>
             

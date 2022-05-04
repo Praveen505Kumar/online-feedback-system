@@ -69,7 +69,7 @@
                             <input type="text" name="rollno" class="form-control" id="rollno" placeholder="Enter roll number" required>
                         </div>
                         <br/><br/>
-                        <button class="btn btn-md btn-primary btn-block"type="submit">Reset Password</button>
+                        <button class="btn btn-md btn-primary btn-block" type="submit">Reset Password</button>
                     </form>
                     <?php
                         if($msg=="pwd_chngd"){

@@ -1,7 +1,8 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
-        
+    
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv'] == "hod" || $_SESSION['priv']=="admin" || $_SESSION['priv']=="staff" )){
+        $_POST['facname'] = $_SESSION['user'];
         if(!empty($_POST['facname']) && !empty($_POST['subject']) ){
             require('header.php');
             require("config/db_connect.php");
@@ -76,21 +77,30 @@
         <div class="col-sm-4 mt-3 me-4 d-print-none" style="max-width:400px;">
             <div class="list-group">
                     <?php
-                        $menu_id = 11;
-                        require_once("menu.php");
+                        if($_SESSION['priv'] == "admin"){
+                            $menu_id = 11;
+                            require_once("menu.php");
+                        }else{
+                            $menu_id = 1;
+                            require_once("facmenu.php");
+                        }
+                        
                     ?>
             </div>
         </div>
         <div class="col-sm-8 my-2">
             <div class="container text-center d-print-none">
                 <?php
-                    echo "<h4>Selected Department: &emsp;";
-                    if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
-                        echo "None";
-                    }else{
-                        echo $_SESSION['branch'];
+                    if($_SESSION['priv'] == "admin"){
+                        echo "<h4>Selected Department: &emsp;";
+                        if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
+                            echo "None";
+                        }else{
+                            echo $_SESSION['branch'];
+                        }
+                        echo "</h4>";
                     }
-                    echo "</h4>";
+                    
                 ?>
             </div>
             <div class="row">

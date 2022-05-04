@@ -2,8 +2,11 @@
     @session_start();
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
         require('header.php');
+        require("config/db_connect.php");
+        
+        
         if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            require("config/db_connect.php");
+            
             // getting regulations
             if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
                 if($stmt->execute()){
@@ -15,6 +18,7 @@
                         $i++;
                     }
                 }
+                $stmt->close();
             }
             
         }
@@ -39,29 +43,36 @@
                         echo $_SESSION['branch'];
                     }
                     echo "</h4>";
+
+                    // faculty and subject mapping, storing data into database
+                    if(!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['subject']) && !empty($_POST['faculty']) ){
+                            
+                        $reg = $_POST['regulation'];
+                        $year = $_POST['year'];
+                        $sem = $_POST['sem'];
+                        $subject = $_POST['subject'];
+                        $faculty = $_POST['faculty'];
+                        $cr_code = 'A';
+                        $branch = $_SESSION['branch'];
+                        $br_code = $_SESSION['br_code'];
+
+                        if($stmt = $conn->prepare("INSERT INTO `fac_course` (`regulation`,`cr_code`,`branch`,`br_code`,`year`,`sem`,`subject`,`fname`) VALUES (?,?,?,?,?,?,?,?);")){
+                            $stmt->bind_param("ssssssss", $reg, $cr_code, $branch, $br_code, $year, $sem, $subject, $faculty);
+                            if($stmt->execute()){
+                                if($conn->affected_rows){
+                                    echo '<div class="alert alert-warning">Success..! mapping done </div>';
+                                }
+                            }
+                            $stmt->close();
+                        }
+                    }
                 ?>
             </div>
-            <div class="container text-center">
-                <?php
-                    if(!empty($_GET['msg']) && $_GET['msg']=='feedback_activated'){
-                        echo "<div class='alert alert-success'>Feedback Activated Successfully</div>";
-                    }
-                    else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_not_activated'){
-                        echo "<div class='alert alert-danger'>Feedback Not Activated..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_exists'){
-                        echo "<div class='alert alert-warning'>Feedback Exists..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='start_end_time_error'){
-                        echo "<div class='alert alert-warning'>From DateTime Value > To DateTime Value..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='end_time_error'){
-                        echo "<div class='alert alert-warning'>To DateTime Value is Invalid/Expired..!</div>";
-                    }
-                ?>
-            </div>
-            <div class="card cards content text-center mt-5" style="max-width:500px;">
+            <div class="card cards content text-center mt-5 mb-0" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Select The Following</div>
                 <div class="card-body">
-                    <form action="active.php" roll="form" method="post">
+                    <form action="fac_course.php" roll="form" method="POST">
                         <div class="mb-3">
                             <div class="mb-3 row">
                                 <label class="col-sm-6 col-form-label" style="font-weight: bold;" for="reg">Select Regulation&emsp;:&emsp;</label>
@@ -120,22 +131,73 @@
                     </form>
                 </div>
             </div>
+            <div class="" style="max-width=800px;">
+                <div class="card  text-center mt-4" >
+                    <div class="card-header" style="font-weight: bold;">Added Subjects</div>
+                    <div class="card-body" id="addedsub">
+                        <?php
+                            if(!empty($_POST['delsubfac']) && !empty($_POST['subfacid'])){
+                                $id = $_POST['subfacid'];
+                                if($stmt = $conn->prepare("DELETE FROM `fac_course` WHERE `id` = ?;")){
+                                    $stmt->bind_param("d", $id);
+                                    if($stmt->execute()){
+                                        echo '<div class="alert alert-warning">
+                                                Success..! Subject - Faculty Deleted 
+                                              </div>';
+                                    }
+                                    $stmt->close();
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
+            </div>
         </div>
         
     </div>
+    
 </div>
 <script>
     $(document).ready(function(){
-        $.ajax({
-            url:"config/ajaxfaculty.php",
-            method:"POST",
-            data:{},
-            dataType:"text",
-            success:function(data){
-                $("#faculty").html(data);
-            }
+        $('#sem').change(function(){
+            var _reg = $("#reg").val();
+            var _year = $("#year").val();
+            var _sem = $("#sem").val();
+            // added fac_course details
+            $.ajax({
+                url:"config/ajgetsubfac.php",
+                method:"POST",
+                data:{reg:_reg, year:_year, sem:_sem},
+                dataType:"text",
+                success:function(data){
+                    $("#addedsub").html(data);
+                }
+            });
+            // faculty details
+            $.ajax({
+                url:"config/ajaxfaculty.php",
+                method:"POST",
+                data:{},
+                dataType:"text",
+                success:function(data){
+                    $("#faculty").html(data);
+                }
+            });
+            //subject details
+            $.ajax({
+                url:"config/ajaxsubject.php",
+                method:"POST",
+                data:{reg:_reg, year:_year, sem:_sem},
+                dataType:"text",
+                success:function(data){
+                    $("#subject").html(data);
+                }
+            });
         });
+        
+
     });
+
 </script>
 
 <?php 
