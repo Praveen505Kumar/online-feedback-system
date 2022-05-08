@@ -1,56 +1,33 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
         require('header.php');
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            require("config/db_connect.php");
-            // getting regulations
-            if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
-                if($stmt->execute()){
-                    $stmt->bind_result($reg);
-                    $i=0;
-                    $regulation = array();
-                    while($stmt->fetch()){
-                        $regulation[$i]=$reg;
-                        $i++;
-                    }
-                }
-                $stmt->close();
-            }
-            // adding subjects
-            if(!empty($_POST['subject'])){
-                $reg = $_POST['reg'];
-                $year = $_POST['year'];
-                $sem = $_POST['sem'];
-                $sub = $_POST['subject'];
-                $br_code = $_SESSION['br_code'];
-                $branch = $_SESSION['branch'];
-                $cr_code = "A";
-                
-                if($stmt = $conn->prepare("INSERT INTO `subjects_2` (`regulation`,`br_code`,`cr_code`,`branch`,`year`,`sem`,`sub`) VALUES (?,?,?,?,?,?,?);")){
-                    $stmt->bind_param("sssssss", $reg, $br_code, $cr_code, $branch, $year, $sem, $sub);
-                    if($stmt->execute()){
-                        if($conn->affected_rows){
-                            // subject added successfully
-                        }
-                    }
-                    $stmt->close();
-                }
-            }
-            // remove subject
-            if(!empty($_POST['subid'])){    
-                $subid = $_POST['subid'];
-                if($stmt =  $conn->prepare("DELETE FROM `subjects_2` WHERE `id` = ?;")){
-                    
-                    $stmt->bind_param("d", $subid);
-                    if($stmt->execute()){
-                        // subject removed
-                    }
-                }
-            }
-            
-            
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // getting regulation
+        $regulation = $opt->getRegulation();
+        
+        // adding subjects
+        if(!empty($_POST['subject'])){
+            $reg = $_POST['reg'];
+            $year = $_POST['year'];
+            $sem = $_POST['sem'];
+            $sub = $_POST['subject'];
+            $br_code = $_SESSION['br_code'];
+            $branch = $_SESSION['branch'];
+            $cr_code = "A";
+            $opt->addSubject($reg, $year, $sem, $sub, $br_code, $branch, $cr_code);
         }
+
+        // remove subject
+        if(!empty($_POST['subid'])){    
+            $subid = $_POST['subid'];
+            $opt->removeSubject($subid);
+        }
+            
 ?>
 <div class="ms-2">
     <div class="row">
@@ -198,5 +175,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

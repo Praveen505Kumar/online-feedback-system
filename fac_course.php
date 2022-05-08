@@ -2,26 +2,34 @@
     @session_start();
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
         require('header.php');
-        require("config/db_connect.php");
-        
-        
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            
-            // getting regulations
-            if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
-                if($stmt->execute()){
-                    $stmt->bind_result($reg);
-                    $i=0;
-                    $regulation = array();
-                    while($stmt->fetch()){
-                        $regulation[$i]=$reg;
-                        $i++;
-                    }
-                }
-                $stmt->close();
-            }
-            
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // getting regulation
+        $regulation = $opt->getRegulation();
+
+        // faculty and subject mapping
+        if(!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['subject']) && !empty($_POST['faculty']) ){
+                            
+            $reg = $_POST['regulation'];
+            $year = $_POST['year'];
+            $sem = $_POST['sem'];
+            $sub = $_POST['subject'];
+            $faculty = $_POST['faculty'];
+            $cr_code = 'A';
+            $branch = $_SESSION['branch'];
+            $br_code = $_SESSION['br_code'];
+
+            $msg = $opt->facSubjectMap($reg, $year, $sem, $sub, $br_code, $branch, $cr_code, $faculty);
         }
+        // deleting fac_subject mapping
+        if(!empty($_POST['delsubfac']) && !empty($_POST['subfacid'])){
+            $subfacid = $_POST['subfacid'];
+            $msg = $opt->deleteFacSubjectMap($subfacid);
+        }
+        
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -43,29 +51,7 @@
                         echo $_SESSION['branch'];
                     }
                     echo "</h4>";
-
-                    // faculty and subject mapping, storing data into database
-                    if(!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['subject']) && !empty($_POST['faculty']) ){
-                            
-                        $reg = $_POST['regulation'];
-                        $year = $_POST['year'];
-                        $sem = $_POST['sem'];
-                        $subject = $_POST['subject'];
-                        $faculty = $_POST['faculty'];
-                        $cr_code = 'A';
-                        $branch = $_SESSION['branch'];
-                        $br_code = $_SESSION['br_code'];
-
-                        if($stmt = $conn->prepare("INSERT INTO `fac_course` (`regulation`,`cr_code`,`branch`,`br_code`,`year`,`sem`,`subject`,`fname`) VALUES (?,?,?,?,?,?,?,?);")){
-                            $stmt->bind_param("ssssssss", $reg, $cr_code, $branch, $br_code, $year, $sem, $subject, $faculty);
-                            if($stmt->execute()){
-                                if($conn->affected_rows){
-                                    echo '<div class="alert alert-warning">Success..! mapping done </div>';
-                                }
-                            }
-                            $stmt->close();
-                        }
-                    }
+                    
                 ?>
             </div>
             <div class="card cards content text-center mt-5 mb-0" style="max-width:500px;">
@@ -136,17 +122,13 @@
                     <div class="card-header" style="font-weight: bold;">Added Subjects</div>
                     <div class="card-body" id="addedsub">
                         <?php
-                            if(!empty($_POST['delsubfac']) && !empty($_POST['subfacid'])){
-                                $id = $_POST['subfacid'];
-                                if($stmt = $conn->prepare("DELETE FROM `fac_course` WHERE `id` = ?;")){
-                                    $stmt->bind_param("d", $id);
-                                    if($stmt->execute()){
-                                        echo '<div class="alert alert-warning">
+                            if($msg=="delsuccess"){
+                                echo '<div class="alert alert-warning">
                                                 Success..! Subject - Faculty Deleted 
                                               </div>';
-                                    }
-                                    $stmt->close();
-                                }
+                            }
+                            if($msg == "addsuccess"){
+                                echo '<div class="alert alert-warning">Success..! mapping done </div>';
                             }
                         ?>
                     </div>
@@ -202,5 +184,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

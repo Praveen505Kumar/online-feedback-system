@@ -29,7 +29,9 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/print.css" media="print">
 </head>
-<body class="" style="background-image: url('images/college_image.jpg'); background-size:cover; background-repeat: no-repeat;">
+<body <?php  //if(preg_match("/index.php/i", $_SERVER['PHP_SELF'])) {  ?> 
+    style="background-image: url('images/college_image.jpg'); background-size:cover; background-repeat: no-repeat;">
+        <?php //} ?>
     <nav class="navbar navbar-light sticky-top d-print-none" style=" background-image: linear-gradient(#2CE558, #2DCF8C);">
         <div class="">
             <div class="row px-5">

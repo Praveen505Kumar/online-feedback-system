@@ -1,54 +1,24 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
         require('header.php');
-    }
-    if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-        require("config/db_connect.php");
-        if(!empty($_POST['fname'])){
-            
-            $fac=$_POST['fname'];
-            if(!empty($conn)){
-                //For delete faculty
-                if($stmt=$conn->prepare("DELETE FROM `fac_login` WHERE `fname`=?;")){
-                    
-                    $stmt->bind_param("s", $fac);
-                    if($stmt->execute()){
-                        $msg="success";
-                    }
-                    else{
-                        $msg="failure";
-                    }
-                    $stmt->close();
-                }
-                
-
-            }
-        }
         
-        //getting the list
-        $br=$_SESSION['br'];
-        $faculties=array();
-        if(!empty($conn)){
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // delete faculty
+        if(!empty($_POST['fname'])){
+            $faculty = $_POST['fname'];
             
-            if($stmt=$conn->prepare("SELECT DISTINCT `fname` FROM `fac_login` WHERE `br_code`=? AND `privilege` LIKE '%staff%'; ")){
-                
-                $stmt->bind_param("s", $br);
-                
-                if($stmt->execute()){
-                    
-                    $stmt->bind_result($fac);
-                    $i=0;
-                    
-                    while($stmt->fetch()){
-                        $faculties[$i]=$fac;
-                        $i++;
-                    }
-                }
-                $stmt->close();
-            }
+            $msg = $opt->deleteFaculty($faculty);
+
         }
-    }
+
+        //getting faculties list
+        $br_code = $_SESSION['br_code'];
+        $faculties = $opt->getFaultyList($br_code);
+        
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -72,7 +42,7 @@
                     echo "</h4>";
                 ?>
             </div>
-            
+
             <div class="card cards content text-center" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Remove Faculty</div>
@@ -95,10 +65,10 @@
                         <button type="submit" class="btn btn-primary sb-btn px-5">Delete</button>
                     </form>
                     <?php
-                        if($msg=="success"){
+                        if($msg == "success"){
                             echo '<br /><div class="alert alert-success" role="alert">Faculty Details Deleted..!</div>';
                         }
-                        if($msg=="failure"){
+                        if($msg == "failure"){
                             echo '<br /><div class="alert alert-danger" role="alert">Faculty Details Not Deleted..!</div>';
                         }	
                        
@@ -109,9 +79,14 @@
     
         </div>
         
+        
     </div>
 </div>
 
 <?php 
-    require('footer.php');
+        require('footer.php');
+    }
+    else{
+        header('Location: index.php');
+    }
 ?>

@@ -1,26 +1,15 @@
 <?php
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& $_SESSION['priv']=="admin"){
         require('header.php');
-        require('config/db_connect.php');
-        if(!empty($conn)){
-            $br_code = $_SESSION['br_code'];
-            if ($stmt = $conn->prepare("SELECT fid, AVG(avg) FROM `ques` WHERE fid IN (SELECT fname FROM `fac_login` WHERE br_code=?) GROUP BY fid ORDER BY AVG(avg) DESC;")) {
-                $stmt->bind_param("s",$br_code);
-                if($stmt->execute()){
-                    $stmt->bind_result($fac, $score);
-                    $i = 0;
-                    $res = array();
-                    while ($stmt->fetch()) {
-                        $res[$i]['fname'] = $fac;
-                        $res[$i]['score'] = $score;
-                        $i++;
-                    }
-                    
-                }
-            }
-        }
 
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        //getting faculties scores
+        $br_code = $_SESSION['br_code'];
+        $faculties = $opt->getFacultyScores($br_code);
     
 ?>
 <div class="container ms-0">
@@ -56,9 +45,9 @@
                     </thead>
                     <tbody>
                         <?php
-                            for($i=0;$i < sizeof($res);$i++){
+                            for($i=0; $i < sizeof($faculties);$i++){
                                 echo "<tr><td scope='row'>";
-                                echo ($i+1)."</td><td>".$res[$i]['fname']."</td><td>".round($res[$i]['score'], 2)."</td></tr>";
+                                echo ($i+1)."</td><td>".$faculties[$i]['fname']."</td><td>".round($faculties[$i]['score'], 2)."</td></tr>";
                             }
                         ?>
                     </tbody>
@@ -71,5 +60,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

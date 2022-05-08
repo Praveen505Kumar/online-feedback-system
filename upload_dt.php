@@ -1,39 +1,9 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv'] == "admin"){
         require('header.php');
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            if(!empty($_POST['rollno'])){
-                require("config/db_connect.php");
-                
-                $roll = strtoupper($_POST['rollno']);
-                if(!empty($conn)){
-                    if($stmt=$conn->prepare("SELECT  email,spass FROM `st_login` WHERE `sid`=?")){
-                        $stmt->bind_param("s", $roll);
-                        $stmt->execute();
-                        $stmt->bind_result($email, $pass);
-                        
-                        $stmt->fetch();
-                        if(empty($email)){
-                            $msg = 'no_roll';
-                        }else if($roll == $pass){
-                            $msg = "pwd_chngd";
-                        }else{
-                            
-                            $stmt->close();
-                            
-                            if($stmt=$conn->prepare("UPDATE `st_login` SET `spass`=? WHERE `sid`=?")){
-                                
-                                $stmt->bind_param("ss", $roll, $roll);
-                                if($stmt->execute()){
-                                    $msg = "pwd_chngd";
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+
+        
 ?>
 <div class="mx-2">
     <div class="row">
@@ -90,5 +60,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

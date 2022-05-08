@@ -1,49 +1,26 @@
 <?php
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="admin")){
+    date_default_timezone_set("Asia/Kolkata");
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
         require('header.php');
-        require('config/db_connect.php');
-        date_default_timezone_set("Asia/Kolkata");
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // deactivate feedback
         if(!empty($_POST['feed_id'])){
             $today = date("Y-m-d\TH:i", time()-100);
             $feed_id = $_POST['feed_id'];
-            $br_code = $_SESSION['br_code'];
-            if ($stmt = $conn->prepare("UPDATE `activation` SET `to_date`=? WHERE `id`=? AND `branch`=?;")) {
-                $stmt->bind_param("sds", $today, $feed_id, $br_code);
-                if($stmt->execute()){
-                    if($conn->affected_rows){
-                        $msg = "feed_deactive";
-                    }
-                }
-                $stmt->close();
-            }
+            
+            $msg = $opt->deactive($today, $feed_id);
 
-        }
-        if(!empty($conn)){
-            $br_code = $_SESSION['br_code'];
-            $today = date("Y-m-d\TH:i",time());
-            if ($stmt = $conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE branch=? ORDER BY from_date;")) {
-                $stmt->bind_param("s",$br_code);
-                if($stmt->execute()){
-                    $stmt->bind_result($feed_id, $reg, $year, $sem, $from_date, $to_date);
-                    $i = 0;
-                    $feedbacks = array();
-                    while ($stmt->fetch()) {
-                        $feedbacks[$i]['feed_id'] = $feed_id;
-                        $feedbacks[$i]['reg'] = $reg;
-                        $feedbacks[$i]['year'] = $year;
-                        $feedbacks[$i]['sem'] = $sem;
-                        $feedbacks[$i]['from_date'] = date("Y-m-d\TH:i", strtotime($from_date));
-                        $feedbacks[$i]['to_date'] = date("Y-m-d\TH:i", strtotime($to_date));
-                        $i++;
-                    }
-                }
-                $stmt->close();
-            }
         }
         
+        // get active feedbacks
+        $br_code = $_SESSION['br_code'];
+        $feedbacks = $opt->getActiveFeedback($br_code);
 
-    
 ?>
 <div class="mx-2">
     <div class="row mx-0">
@@ -65,7 +42,7 @@
                         echo $_SESSION['branch'];
                     }
                     echo "</h4>";
-                    if($msg=="feed_deactive"){
+                    if($msg == "feed_deactive"){
                         echo "<div class='alert alert-success'>Feedback Deactivated..!</div>";
                     }
                 ?>
@@ -126,5 +103,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

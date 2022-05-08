@@ -1,23 +1,14 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']="admin"){
         require('header.php');
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            require("config/db_connect.php");
-            // getting regulations
-            if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
-                if($stmt->execute()){
-                    $stmt->bind_result($reg);
-                    $i=0;
-                    $regulation = array();
-                    while($stmt->fetch()){
-                        $regulation[$i]=$reg;
-                        $i++;
-                    }
-                }
-            }
-            
-        }
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // getting regulation
+        $regulation = $opt->getRegulation();
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -73,7 +64,7 @@
                                                 echo "<option value='".$regulation[$i]."'>".$regulation[$i]."</option>";
                                             }
                                         ?>        
-                                </select>
+                                    </select>
                                 </div>
                             </div>
                             <div class="mb-4 row">
@@ -123,5 +114,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

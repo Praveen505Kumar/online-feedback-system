@@ -30,6 +30,26 @@
 	?> 
 
 >Show Activated Feedbacks</a>
+<a href="faculty_data.php" 
+    <?php 
+		if(!empty($menu_id) && $menu_id==14){
+			echo "class='list-group-item active'"; 
+		} else{ 
+			echo "class='list-group-item'"; 
+		} 
+	?> 
+
+>Faculty Data</a>
+<a href="student_data.php" 
+    <?php 
+		if(!empty($menu_id) && $menu_id==15){
+			echo "class='list-group-item active'"; 
+		} else{ 
+			echo "class='list-group-item'"; 
+		} 
+	?> 
+
+>Student Data</a>
 <?php
 	if($_SESSION['user'] == "admin" || strtolower($_SESSION['user']) == "administrator"){
 
@@ -44,9 +64,9 @@
 			echo '<a href="delete_fac.php" class="list-group-item" >Delete Faculty</a>';
 		}
 		if(!empty($menu_id) && $menu_id==6){
-			echo '<a href="fac_list.php" class="list-group-item active" >Faculty List</a>';
+			echo '<a href="fac_list.php" class="list-group-item active" >Faculty Scores</a>';
 		}else{
-			echo '<a href="fac_list.php" class="list-group-item" >Faculty List</a>';
+			echo '<a href="fac_list.php" class="list-group-item" >Faculty Scores</a>';
 		}
 		if(!empty($menu_id) && $menu_id==7){
 			echo '<a href="upload_dt.php" class="list-group-item active" >Upload Data</a>';

@@ -1,39 +1,20 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& $_SESSION['priv']=="admin"){
         require('header.php');
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            if(!empty($_POST['rollno'])){
-                require("config/db_connect.php");
-                
-                $roll = strtoupper($_POST['rollno']);
-                if(!empty($conn)){
-                    if($stmt=$conn->prepare("SELECT  email,spass FROM `st_login` WHERE `sid`=?")){
-                        $stmt->bind_param("s", $roll);
-                        $stmt->execute();
-                        $stmt->bind_result($email, $pass);
-                        
-                        $stmt->fetch();
-                        if(empty($email)){
-                            $msg = 'no_roll';
-                        }else if($roll == $pass){
-                            $msg = "pwd_chngd";
-                        }else{
-                            
-                            $stmt->close();
-                            
-                            if($stmt=$conn->prepare("UPDATE `st_login` SET `spass`=? WHERE `sid`=?")){
-                                
-                                $stmt->bind_param("ss", $roll, $roll);
-                                if($stmt->execute()){
-                                    $msg = "pwd_chngd";
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        // reset std password
+        if(!empty($_POST['rollno'])){
+            $rollno = strtoupper($_POST['rollno']);
+            
+            $msg = $opt->resetStdPass($rollno);
+
         }
+
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -72,13 +53,13 @@
                         <button class="btn btn-md btn-primary btn-block" type="submit">Reset Password</button>
                     </form>
                     <?php
-                        if($msg=="pwd_chngd"){
+                        if($msg == "pwd_chngd"){
                             echo '<br /><div class="alert alert-success" role="alert">Password Changed Successfully..!</div>';
                         }
-                        if($msg=="pwd_not_chngd"){
+                        if($msg == "pwd_not_chngd"){
                             echo '<br /><div class="alert alert-danger" role="alert">Password NOT Changed..!</div>';
                         }	
-                        if($msg=="no_roll"){
+                        if($msg == "no_roll"){
                             echo '<br /><div class="alert alert-danger" role="alert">Student Details Not Found..!</div>';
                         }	
                     ?>
@@ -93,5 +74,8 @@
 
 <?php 
         require('footer.php');
+    }
+    else{
+        header('Location: index.php');
     }
 ?>

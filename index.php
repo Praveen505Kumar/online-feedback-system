@@ -8,7 +8,7 @@
         <div class="col-md-4 d-flex justify-content-center">
             <div class="card text-center cards">
                 <div class="card-header">
-                    Student Login
+                    Student Login 
                 </div>
                 <div class="card-body">
                     <form action="student.php" method="post">

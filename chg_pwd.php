@@ -6,36 +6,15 @@
 
         if(!empty($_POST['currentpass'])&& !empty($_POST['newpass']) && !empty($_POST['renewpass']))
         {
-            require("config/db_connect.php");
-            if(!empty($conn)){
+            // connection
+            require("Operations.php");
+            $opt = new Operations();
 
-                $currentpass = $_POST['currentpass'];
-                $newpass = $_POST['newpass'];
-                $renewpass = $_POST['renewpass'];
-
-                if($stmt=$conn->prepare("SELECT fpass FROM `fac_login` WHERE `fname`=?")){
-                    $stmt->bind_param("s", $username);
-                    $stmt->execute();
-                    $stmt->bind_result($password);
-                    $stmt->fetch();
-                    if($password != $currentpass){
-                        $msg = 'incorrect';
-                    }else if($newpass != $renewpass){
-                        $msg = "pwd_mismatch";
-                    }else{
-                        
-                        $stmt->close();
-                        
-                        if($stmt=$conn->prepare("UPDATE `fac_login` SET `fpass`=? WHERE `fname`=?")){
-                            
-                            $stmt->bind_param("ss", $newpass, $username);
-                            if($stmt->execute()){
-                                $msg = "pwd_chngd";
-                            }
-                        }
-                    }
-                }
-            }
+            // changing password
+            $currentpass = $_POST['currentpass'];
+            $newpass = $_POST['newpass'];
+            $renewpass = $_POST['renewpass'];
+            $msg = $opt->changePassword($username, $currentpass, $newpass, $renewpass);
         }
     
 ?>
@@ -75,20 +54,20 @@
                 <div class="card-body">
                     <form action="chg_pwd.php" method="POST">
                         <div class="row mb-3 text-start">
-                            <label class="col-sm-6 text-light col-form-label">Current Password&emsp;&emsp;&emsp;:</label>
+                            <label class="col-sm-6 text-dark col-form-label">Current Password&emsp;&emsp;&emsp;:</label>
                             <div class="col-sm-5">
                                 <input type="password" class="form-control" name="currentpass" required>
                             </div>
                             
                         </div>
                         <div class="row mb-3 text-start">
-                            <label class="col-sm-6 text-light col-form-label">Enter New Password&emsp;&emsp;:</label>
+                            <label class="col-sm-6 text-dark col-form-label">Enter New Password&emsp;&emsp;:</label>
                             <div class="col-sm-5">
                                 <input type="password" class="form-control" name="newpass" required>
                             </div>
                         </div>
                         <div class="row mb-3 text-start">
-                            <label class="col-sm-6 text-light col-form-label">Re-enter New Password&emsp;:</label>
+                            <label class="col-sm-6 text-dark col-form-label">Re-enter New Password&emsp;:</label>
                             <div class="col-sm-5">
                                 <input type="password" class="form-control" name="renewpass" required>
                             </div>

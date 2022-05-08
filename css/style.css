@@ -2,10 +2,10 @@
     box-sizing: border-box;
 }
 
-
-.footer {
-    position: fixed;
+body {
+    background-image: linear-gradient(rgb(86, 168, 234), rgb(155, 172, 180));
 }
+
 
 a {
     color: rgb(19, 18, 18);

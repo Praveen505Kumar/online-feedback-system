@@ -2,33 +2,15 @@
     @session_start();
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv'])&& ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
         require('header.php');
-    }
-    if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-        require("config/db_connect.php");
+
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+
+        //getting faculties list
+        $br_code = $_SESSION['br_code'];
+        $faculties = $opt->getFaultyList($br_code);
         
-        //getting the list
-        $br_code=$_SESSION['br'];
-        $faculties=array();
-        if(!empty($conn)){
-            
-            if($stmt=$conn->prepare("SELECT DISTINCT `fname` FROM `fac_login` WHERE `br_code`=? AND `privilege` LIKE '%staff%'; ")){
-                
-                $stmt->bind_param("s", $br_code);
-                
-                if($stmt->execute()){
-                    
-                    $stmt->bind_result($fac);
-                    $i=0;
-                    
-                    while($stmt->fetch()){
-                        $faculties[$i]=$fac;
-                        $i++;
-                    }
-                }
-                $stmt->close();
-            }
-        }
-    }
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -107,6 +89,11 @@
         });
     });
 </script>
+
 <?php 
-    require('footer.php');
+        require('footer.php');
+    }
+    else{
+        header('Location: index.php');
+    }
 ?>
