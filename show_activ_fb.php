@@ -19,7 +19,7 @@
         
         // get active feedbacks
         $br_code = $_SESSION['br_code'];
-        $feedbacks = $opt->getActiveFeedback($br_code);
+        $feedbacks = $opt->getActiveFeedbackByBranch($br_code);
 
 ?>
 <div class="mx-2">

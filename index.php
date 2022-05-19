@@ -1,5 +1,52 @@
 <?php 
+    @session_start();
+    date_default_timezone_set("Asia/Kolkata");
+    
     require('header.php');
+    if(!empty($_POST['username']) && !empty($_POST['password'])){
+        $username = strtoupper($_POST['username']);
+        $password = strtoupper($_POST['password']);
+        
+        require("Operations.php");
+        $opt = new Operations();
+        $res = $opt->checkStudentLogin($username, $password);
+        
+        if($res['status'] == 'success'){
+            // get feedbacks by year and sem
+            $br_code = $res['br_code'];
+            $year = $res['year'];
+            $sem = $res['sem'];
+            $_SESSION['priv'] = $res['priv'];
+            $_SESSION['user'] = $res['user'];
+            $_SESSION['year'] = $res['year'];
+            $_SESSION['sem'] = $res['sem'];
+            $_SESSION['reg'] = $res['reg'];
+            $_SESSION['br_code'] = $res['br_code'];
+            $_SESSION['roll'] = $username;
+            $today = date("Y-m-d\TH:i", time()-100);
+            $feedbacks = $opt->getActiveFeedbackByStudent($br_code, $year, $sem);
+            $temp = 0;
+            foreach($feedbacks as $feedback){
+                if(!empty($feedback['from_date']) && !empty($feedback['to_date']) && $feedback['from_date'] <= $today && $today <= $feedback['to_date']){
+                    header('Location: student.php');
+                    $temp = 1;
+                    break;
+                }
+            }
+            if($temp == 0){
+                session_unset();
+				echo '<script type="text/javascript">
+                            alert("Feedback is NOT active for your class..!"); 
+                            document.location.href = "index.php";
+                      </script>';
+            }
+        }else{
+            echo '<script type="text/javascript">
+                    alert("Invalid Username or Password..!"); 
+                    document.location.href = "index.php";
+                  </script>';
+        }
+    }
 ?>
 
 <div class="container names">
@@ -11,7 +58,7 @@
                     Student Login 
                 </div>
                 <div class="card-body">
-                    <form action="student.php" method="post">
+                    <form action="index.php" method="post">
                         <div class="mb-3 input-group">
                             <label for="uname" class="names">Username</label>
                             <div class="input-group">
@@ -20,7 +67,7 @@
                                         <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                                     </svg>
                                 </span>
-                                <input type="text" class="form-control" id="uname" placeholder="XXKA1AXXXX" aria-describedby="adminnumber" required>
+                                <input type="text" class="form-control" id="uname" name="username" placeholder="XXKA1AXXXX" aria-describedby="adminnumber" required>
                             </div>
                         </div>
                         <div class="mb-3 input-group">
@@ -31,7 +78,7 @@
                                         <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
                                     </svg>
                                 </span>
-                                <input type="password" class="form-control" id="pass" placeholder="*********" aria-describedby="adminnumber" required>
+                                <input type="password" class="form-control" id="pass" name="password" placeholder="*********" aria-describedby="adminnumber" required>
                             </div>
                         </div>
                         

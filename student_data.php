@@ -83,49 +83,47 @@
                         echo '<br /><div class="alert alert-danger" role="alert">Student Details Not Deleted..!</div>';
                     }
                 ?>
+                
             </div>
             <div class="">
-                <form action="" method="post">
-                    <div class="mb-4 row">
-                        <label class="col-auto col-form-label" style="font-weight: bold;" for="regulation">Regulation:</label>
-                        <div class="col-auto ">
-                            <select class="form-select text-center" name="regulation" id="regulation" required>
-                                <option value="">Select</option>
-                                <?php
-                                    for($i=0;$i < sizeof($regulation);$i++){
-                                        if(!empty($_COOKIE['reg']) && $_COOKIE['reg'] == $regulation[$i]){ 
-                                            echo "<option value='".$regulation[$i]."' selected>".$regulation[$i]."</option>"; 
-                                        }else{
+                <div class="row">
+                    <form action="" method="post">
+                        <div class="mb-4 row">
+                            <label class="col-auto col-form-label" style="font-weight: bold;" for="regulation">Regulation:</label>
+                            <div class="col-auto ">
+                                <select class="form-select text-center" name="regulation" id="regulation" required>
+                                    <option value="">Select</option>
+                                    <?php
+                                        for($i=0;$i < sizeof($regulation);$i++){
                                             echo "<option value='".$regulation[$i]."'>".$regulation[$i]."</option>";
                                         }
-                                    }
-                                ?>        
-                            </select>
+                                    ?>        
+                                </select>
+                            </div>
+                            <label class="col-auto col-form-label" style="font-weight: bold;" for="year" required>Year:</label>
+                            <div class="col-auto">
+                                <select class="form-select text-center" name="year" id="year" required>
+                                    <option value="">Select</option>
+                                    <option value="I">I</option>
+                                    <option value="II">II</option>
+                                    <option value="III">III</option>
+                                    <option value="IV">IV</option>    
+                                </select>
+                            </div>
+                            <label class="col-auto col-form-label" for="sem" style="font-weight: bold;" required>Semester:</label>
+                            <div class="col-auto">
+                                <select class="form-select text-center" name="sem" id="sem" required>
+                                    <option value="">Select</option>
+                                    <option value="I">I</option>
+                                    <option value="II">II</option>
+                                </select>
+                            </div>
+                            <input type="submit" class="col-auto btn btn-primary" name="show" value="SHOW">
+                            <button type="button" class="col-auto btn btn-lg btn-success px-3 ms-2" data-bs-toggle="modal" data-bs-target="#AddModal">Add</button>
                         </div>
-                        <label class="col-auto col-form-label" style="font-weight: bold;" for="year" required>Year:</label>
-                        <div class="col-auto">
-                            <select class="form-select text-center" name="year" id="year" required>
-                                <option value="">Select</option>
-                                <option value="I" <?php if(!empty($_COOKIE['year']) && $_COOKIE['year'] == "I"){ echo 'selected'; } ?> >I</option>
-                                <option value="II" <?php if(!empty($_COOKIE['year']) && $_COOKIE['year'] == "II"){ echo 'selected'; } ?> >II</option>
-                                <option value="III" <?php if(!empty($_COOKIE['year']) && $_COOKIE['year'] == "III"){ echo 'selected'; } ?> >III</option>
-                                <option value="IV" <?php if(!empty($_COOKIE['year']) && $_COOKIE['year'] == "IV"){ echo 'selected'; } ?> >IV</option>    
-                            </select>
-                        </div>
-                        <label class="col-auto col-form-label" for="sem" style="font-weight: bold;" required>Semester:</label>
-                        <div class="col-auto">
-                            <select class="form-select text-center" name="sem" id="sem" required>
-                                <option value="">Select</option>
-                                <option value="I" <?php if(!empty($_COOKIE['sem']) && $_COOKIE['sem'] == "I"){ echo 'selected'; } ?> >I</option>
-                                <option value="II" <?php if(!empty($_COOKIE['sem']) && $_COOKIE['sem'] == "II"){ echo 'selected'; } ?> >II</option>
-                            </select>
-                        </div>
-                        <input type="submit" class="col-auto btn btn-primary" name="show" value="SHOW">
-                    </div>
-                </form>
-                
-                <div class="row">
-                    <table class="table table-success table-hover  border-success text-center">
+                    </form>
+                </div>
+                <table class="table table-success table-hover  border-success text-center">
                         <thead>
                             <tr>
                                 <th scope="col">S.No</th>
@@ -157,8 +155,6 @@
                             <?php } ?>
                         </tbody>
                     </table>
-                    <button  type="button" class="btn btn-lg btn-primary px-3" data-bs-toggle="modal" data-bs-target="#AddModal">Add</button>
-                </div>
 
                 <!-- Delete Modal -->
                 <div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">

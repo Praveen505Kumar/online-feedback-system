@@ -14,7 +14,7 @@
             $currentpass = $_POST['currentpass'];
             $newpass = $_POST['newpass'];
             $renewpass = $_POST['renewpass'];
-            $msg = $opt->changePassword($username, $currentpass, $newpass, $renewpass);
+            $msg = $opt->changeStdPassword($username, $currentpass, $newpass, $renewpass);
         }
     
 ?>
@@ -23,39 +23,20 @@
         <div class="col-5 mt-3 me-5" style="max-width:400px;">
             <div class="list-group">
                     <?php
-                        if($_SESSION['priv'] == "admin"){
-                            $menu_id = 13;
-                            require_once("menu.php");
-                        }else if($_SESSION['priv'] == "staff"){
+                        if($_SESSION['priv'] == "student"){
                             $menu_id = 2;
-                            require_once("facmenu.php");
-                        }else if($_SESSION['priv'] == "hod"){
-                            $menu_id = 4;
-                            require_once("hodmenu.php");
+                            require_once("stdmenu.php");
                         }
                     ?>
             </div>
         </div>
         <div class="col-7 mx-5 my-2">
-            <div class="container text-center">
-                <?php
-                    if($_SESSION['priv'] == "admin"){
-                        echo "<h4>Selected Department: &emsp;";
-                        if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
-                            echo "None";
-                        }else{
-                            echo $_SESSION['branch'];
-                        }
-                        echo "</h4>";
-                    }
-                ?>
-            </div>
             
             <div class="card cards content text-center" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Change Password</div>
                 <div class="card-body">
-                    <form action="chg_pwd.php" method="POST">
+                    <form action="chg_std_pwd.php" method="POST">
                         <div class="row mb-3 text-start">
                             <label class="col-sm-6 text-dark col-form-label">Current Password&emsp;&emsp;&emsp;:</label>
                             <div class="col-sm-5">

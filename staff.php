@@ -13,7 +13,7 @@
       }
       else if($res == 'hod'){
          header('Location: hod.php');
-      }else if($res == 'staff.php'){
+      }else if($res == 'staff'){
          header('Location: faculty.php');
       }else{
          header('Location: loginerror.php');

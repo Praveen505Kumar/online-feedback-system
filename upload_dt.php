@@ -35,7 +35,7 @@
                         <div class="mb-3 px-4">
                             <input class="form-control form-control-lg" type="file" accept=".csv">
                         </div>
-                        <button class="btn btn-md btn-success btn-block px-5"type="submit">Import</button>
+                        <button class="btn btn-md btn-success btn-block px-5" type="submit">Import</button>
                     </div>
                     
                 </div>

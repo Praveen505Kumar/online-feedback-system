@@ -10,7 +10,7 @@
         // getting regulation
         $regulation = $opt->getRegulation();
 
-        // faculty and subject mapping
+        // faculty and subject mapping add button
         if(!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['subject']) && !empty($_POST['faculty']) ){
                             
             $reg = $_POST['regulation'];
@@ -118,7 +118,7 @@
                 </div>
             </div>
             <div class="" style="max-width=800px;">
-                <div class="card  text-center mt-4" >
+                <div class="card text-center mt-4" >
                     <div class="card-header" style="font-weight: bold;">Added Subjects</div>
                     <div class="card-body" id="addedsub">
                         <?php
@@ -128,7 +128,7 @@
                                               </div>';
                             }
                             if($msg == "addsuccess"){
-                                echo '<div class="alert alert-warning">Success..! mapping done </div>';
+                                echo '<div class="alert alert-success">Success..! mapping done </div>';
                             }
                         ?>
                     </div>
@@ -145,6 +145,7 @@
             var _reg = $("#reg").val();
             var _year = $("#year").val();
             var _sem = $("#sem").val();
+
             // added fac_course details
             $.ajax({
                 url:"config/ajgetsubfac.php",
@@ -155,6 +156,7 @@
                     $("#addedsub").html(data);
                 }
             });
+
             // faculty details
             $.ajax({
                 url:"config/ajaxfaculty.php",
@@ -165,6 +167,7 @@
                     $("#faculty").html(data);
                 }
             });
+
             //subject details
             $.ajax({
                 url:"config/ajaxsubject.php",

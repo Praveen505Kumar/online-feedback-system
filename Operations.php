@@ -1,6 +1,6 @@
 <?php
     @session_start();
-    date_default_timezone_set("Asial/Kolkata");
+    date_default_timezone_set("Asia/Kolkata");
     require("database.php");
     
     class Operations extends Database{
@@ -33,7 +33,30 @@
                 }
             }
         }
-
+        
+        function checkStudentLogin($username, $password){
+            $res = array();
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("SELECT `privilege`, `regulation`, `br_code`, `email`, `year`, `sem` FROM `st_login` WHERE `sid`=? AND `spass`=?;")){
+                    $stmt->bind_param("ss", $username, $password);
+                    if($stmt->execute()){
+                        $stmt->bind_result($priv, $reg, $br_code, $name, $year, $sem);
+                        while($stmt->fetch()){
+                            $res['priv'] = $priv;
+                            $res['br_code'] = $br_code;
+                            $res['user'] = $name;
+                            $res['year'] = $year;
+                            $res['sem'] = $sem;
+                            $res['reg'] = $reg;
+                            $res['status'] =  "success";
+                            return $res;
+                        }
+                    }
+                }
+            }
+            $res['status'] =  "failure";
+            return $res;
+        }
         function getDepartment(){
             $branches = array();
             if($this->my_error==0 && !empty($this->my_conn)){
@@ -80,7 +103,7 @@
             }
         }
 
-        function getActiveFeedback($br_code){
+        function getActiveFeedbackByBranch($br_code){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
                 if($stmt = $this->my_conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE branch=? ORDER BY from_date;")){
@@ -93,6 +116,25 @@
                             $feedbacks[$i]['reg'] = $reg;
                             $feedbacks[$i]['year'] = $year;
                             $feedbacks[$i]['sem'] = $sem;
+                            $feedbacks[$i]['from_date'] = date("Y-m-d\TH:i", strtotime($from_date));
+                            $feedbacks[$i]['to_date'] = date("Y-m-d\TH:i", strtotime($to_date));
+                            $i++;
+                        }
+                    }
+                }
+            }
+            return $feedbacks;
+        }
+
+        function getActiveFeedbackByStudent($br_code, $year, $sem){
+            $feedbacks = array();
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `from_date`, `to_date` FROM `activation` WHERE `branch`=? AND `year`=? AND `sem`=?;")){
+                    $stmt->bind_param("dss", $br_code, $year, $sem);
+                    if($stmt->execute()){
+                        $stmt->bind_result($from_date, $to_date);
+                        $i = 0;
+                        while ($stmt->fetch()) {
                             $feedbacks[$i]['from_date'] = date("Y-m-d\TH:i", strtotime($from_date));
                             $feedbacks[$i]['to_date'] = date("Y-m-d\TH:i", strtotime($to_date));
                             $i++;
@@ -189,10 +231,45 @@
             }
         }
 
-        function removeSubject($subid){
+        function addPartialSubject($stds, $sub, $reg, $year, $sem, $br_code){
             if($this->my_error==0 && !empty($this->my_conn)){
-                if($stmt=$this->my_conn->prepare("DELETE FROM `subjects_2` WHERE `id` = ?;")){
-                    $stmt->bind_param("d", $subid);
+                foreach($stds as $std){
+                    $dupcount = 0;
+                    if($stmt1 = $this->my_conn->prepare("SELECT COUNT(*) FROM `partial_subjects` WHERE `std_id`=? AND `subject`=?;")){
+                        $stmt1->bind_param("ss", $std, $sub);
+                        if($stmt1->execute()){
+                            $stmt1->bind_result($dupcount);
+                            while ($stmt1->fetch()) {
+                                
+                            }
+                        }
+                    }
+                    if($dupcount == 0){
+                        $stmt1->close();
+                        if($stmt=$this->my_conn->prepare("INSERT INTO `partial_subjects` (`std_id`,`subject`,`regulation`,`br_code`,`year`,`sem`) VALUES (?,?,?,?,?,?);")){
+                            $stmt->bind_param("ssddss", $std, $sub, $reg, $br_code, $year, $sem);
+                            $stmt->execute();  
+                            $stmt->close();                          
+                        }
+                    }
+                }
+                if($this->my_conn->affected_rows){
+                    return "parsuccess";
+                }
+            }
+            return "parfailure";
+        }
+
+        function removeSubject($delsub){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("DELETE FROM `subjects_2` WHERE `sub` = ?;")){
+                    $stmt->bind_param("s", $delsub);
+                    if($stmt->execute()){
+                        // subject removed
+                    }
+                }
+                if($stmt=$this->my_conn->prepare("DELETE FROM `partial_subjects` WHERE `subject` = ?;")){
+                    $stmt->bind_param("s", $delsub);
                     if($stmt->execute()){
                         // subject removed
                     }
@@ -248,6 +325,31 @@
             }
         }
 
+        function changeStdPassword($username, $currentpass, $newpass, $renewpass){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                $username = $_SESSION['roll'];
+                if($stmt=$this->my_conn->prepare("SELECT spass FROM `st_login` WHERE `sid`=?;")){
+                    $stmt->bind_param("s", $username);
+                    $stmt->execute();
+                    $stmt->bind_result($password);
+                    $stmt->fetch();
+                    if($password != $currentpass){
+                        return 'incorrect';
+                    }else if($newpass != $renewpass){
+                        return "pwd_mismatch";
+                    }else{
+                        $stmt->close();
+                        if($stmt=$this->my_conn->prepare("UPDATE `st_login` SET `spass`=? WHERE `sid`=?;")){
+                            $stmt->bind_param("ss", $newpass, $username);
+                            if($stmt->execute()){
+                                return "pwd_chngd";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         function setFaculty($name, $user, $pass, $email, $priv){
             if($this->my_error==0 && !empty($this->my_conn)){
                 $br_code = $_SESSION['br_code'];
@@ -281,8 +383,8 @@
         function getStudentDetails($reg, $year, $sem, $br_code){
             $students = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `sid`, `email` FROM `st_login` WHERE `regulation`=? AND `year`=? AND `br_code`=?;")){
-                    $stmt->bind_param("dsd", $reg, $year, $br_code);
+                if($stmt = $this->my_conn->prepare("SELECT `sid`, `email` FROM `st_login` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
+                    $stmt->bind_param("dssd", $reg, $year, $sem, $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($roll, $name);
                         $i=0;
@@ -341,6 +443,21 @@
                 }
             }
             return "setfailure";
+        }
+
+        function UpdateStdYearSem($fromreg, $fromyear, $fromsem, $toreg, $toyear, $tosem){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                $br_code = $_SESSION['br_code'];
+                if($stmt=$this->my_conn->prepare("UPDATE `st_login` SET `regulation`=?, `year`=?, `sem`=? WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
+                    $stmt->bind_param("dssdssd", $toreg, $toyear, $tosem, $fromreg, $fromyear, $fromsem, $br_code);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+                            return "updatesuccess";
+                        }
+                    }
+                }
+            }
+            return "updatefailure";
         }
 
     }

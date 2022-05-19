@@ -2,7 +2,9 @@
     @session_start();
     
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv'] == "hod" || $_SESSION['priv']=="admin" || $_SESSION['priv']=="staff" )){
-        $_POST['facname'] = $_SESSION['user'];
+        if($_SESSION['priv'] == 'staff'){
+            $_POST['facname'] = $_SESSION['user'];
+        }
         if(!empty($_POST['facname']) && !empty($_POST['subject']) ){
             require('header.php');
             require("config/db_connect.php");
@@ -80,9 +82,12 @@
                         if($_SESSION['priv'] == "admin"){
                             $menu_id = 11;
                             require_once("menu.php");
-                        }else{
+                        }else if($_SESSION['priv'] == "staff"){
                             $menu_id = 1;
                             require_once("facmenu.php");
+                        }else{
+                            $menu_id = 3;
+                            require_once("hodmenu.php");
                         }
                         
                     ?>

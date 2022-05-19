@@ -1,22 +1,20 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']="hod" || $_SESSION['priv']="admin")){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']=="hod" || $_SESSION['priv']=="admin")){
         require('header.php');
-        if($_SESSION['user']=="admin" || strtolower($_SESSION['user'])=="administrator"){
-            require("config/db_connect.php");
-            // getting regulations
-            if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
-                if($stmt->execute()){
-                    $stmt->bind_result($reg);
-                    $i=0;
-                    $regulation = array();
-                    while($stmt->fetch()){
-                        $regulation[$i]=$reg;
-                        $i++;
-                    }
+
+        require("config/db_connect.php");
+        // getting regulations
+        if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
+            if($stmt->execute()){
+                $stmt->bind_result($reg);
+                $i=0;
+                $regulation = array();
+                while($stmt->fetch()){
+                    $regulation[$i]=$reg;
+                    $i++;
                 }
             }
-            
         }
 ?>
 <div class="container ms-0">
@@ -24,21 +22,28 @@
         <div class="col-5 mt-3 me-5" style="max-width:400px;">
             <div class="list-group">
                     <?php
+                    if($_SESSION['priv'] == "admin"){
                         $menu_id = 10;
                         require_once("menu.php");
+                    }else{
+                        $menu_id = 2;
+                        require_once("hodmenu.php");
+                    }
                     ?>
             </div>
         </div>
         <div class="col-7 mx-5 my-2">
             <div class="container text-center">
                 <?php
-                    echo "<h4>Selected Department: &emsp;";
-                    if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
-                        echo "None";
-                    }else{
-                        echo $_SESSION['branch'];
+                    if($_SESSION['priv'] == "admin"){
+                        echo "<h4>Selected Department: &emsp;";
+                        if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
+                            echo "None";
+                        }else{
+                            echo $_SESSION['branch'];
+                        }
+                        echo "</h4>";
                     }
-                    echo "</h4>";
                 ?>
             </div>
             <div class="container text-center">
@@ -144,5 +149,7 @@
 
 <?php 
         require('footer.php');
+    }else{
+        header('Location: index.php');
     }
 ?>
