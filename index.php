@@ -16,6 +16,7 @@
             $br_code = $res['br_code'];
             $year = $res['year'];
             $sem = $res['sem'];
+            $reg = $res['reg'];
             $_SESSION['priv'] = $res['priv'];
             $_SESSION['user'] = $res['user'];
             $_SESSION['year'] = $res['year'];
@@ -24,7 +25,7 @@
             $_SESSION['br_code'] = $res['br_code'];
             $_SESSION['roll'] = $username;
             $today = date("Y-m-d\TH:i", time()-100);
-            $feedbacks = $opt->getActiveFeedbackByStudent($br_code, $year, $sem);
+            $feedbacks = $opt->getActiveFeedbackByStudent($br_code, $year, $sem, $reg);
             $temp = 0;
             foreach($feedbacks as $feedback){
                 if(!empty($feedback['from_date']) && !empty($feedback['to_date']) && $feedback['from_date'] <= $today && $today <= $feedback['to_date']){

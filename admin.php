@@ -1,6 +1,6 @@
 <?php
     @session_start();
-	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']="admin"){
+	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
 	    require('header.php');
         
         $br_codes = array("CSE"=>05, "CIVIL"=>01, "EEE"=>02, "ECE"=>04, "MECH"=>03, "FDT"=>07);

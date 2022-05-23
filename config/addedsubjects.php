@@ -52,6 +52,10 @@
 <?php 
     }
     if(!empty($_POST['roll'])){
+        // connection
+        require("../Operations.php");
+        $opt = new Operations();
+
         $roll = $_POST['roll']; 
         $reg = $_SESSION['reg'];
         $br_code = $_SESSION['br_code'];
@@ -59,7 +63,7 @@
         $sem = $_SESSION["sem"];
         $subjects = array();
         $i = 0;
-
+        $res = "<option value=''>Select</option>";
         if($stmt =  $conn->prepare("SELECT `sub` FROM `subjects_2` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
             $stmt->bind_param("ssss", $reg, $year, $sem, $br_code);
             if($stmt->execute()){
@@ -80,8 +84,15 @@
             }
             $stmt->close();
         }
+        $submittedsub = $opt->getFeedsSubmitted($_SESSION['roll'], 38);
         foreach($subjects as $subject){
-            echo "<option value='$subject'>$subject</option>";
+            if(empty($submittedsub)){
+                $res .= "<option value='$subject'>$subject</option>";   
+            }
+            elseif(!in_array($subject, $submittedsub)){			
+                $res .= "<option value='$subject'>$subject</option>";
+            }
         }
+        echo $res;
     }
 ?>

@@ -1,7 +1,7 @@
 <?php 
     @session_start();
     
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv'] == "hod" || $_SESSION['priv']=="admin" || $_SESSION['priv']=="staff" )){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv'] == "hod" || $_SESSION['priv'] == "admin" || $_SESSION['priv']=="staff" )){
         if($_SESSION['priv'] == 'staff'){
             $_POST['facname'] = $_SESSION['user'];
         }
@@ -56,7 +56,7 @@
                         }
                     }
                 }
-                if($stmt=$conn->prepare("SELECT cmnt FROM `comments` WHERE fname = ? AND subject = ?;")){
+                if($stmt=$conn->prepare("SELECT DISTINCT `cmnt` FROM `comments` WHERE fname = ? AND subject = ?;")){
                     $stmt->bind_param("ss", $facname, $subject);
                     if($stmt->execute()){
                         

@@ -106,7 +106,7 @@
         function getActiveFeedbackByBranch($br_code){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE branch=? ORDER BY from_date;")){
+                if($stmt = $this->my_conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE `branch`=? ORDER BY `regulation`, `year`, `sem`;")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($feed_id, $reg, $year, $sem, $from_date, $to_date);
@@ -126,15 +126,16 @@
             return $feedbacks;
         }
 
-        function getActiveFeedbackByStudent($br_code, $year, $sem){
+        function getActiveFeedbackByStudent($br_code, $year, $sem, $reg){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `from_date`, `to_date` FROM `activation` WHERE `branch`=? AND `year`=? AND `sem`=?;")){
-                    $stmt->bind_param("dss", $br_code, $year, $sem);
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `branch`=? AND `year`=? AND `sem`=? AND `regulation`=?;")){
+                    $stmt->bind_param("dssd", $br_code, $year, $sem, $reg);
                     if($stmt->execute()){
-                        $stmt->bind_result($from_date, $to_date);
+                        $stmt->bind_result($id, $from_date, $to_date);
                         $i = 0;
                         while ($stmt->fetch()) {
+                            $feedbacks[$i]['id'] = $id;
                             $feedbacks[$i]['from_date'] = date("Y-m-d\TH:i", strtotime($from_date));
                             $feedbacks[$i]['to_date'] = date("Y-m-d\TH:i", strtotime($to_date));
                             $i++;
@@ -143,6 +144,24 @@
                 }
             }
             return $feedbacks;
+        }
+
+        function getFeedsSubmitted($user, $feed_id){
+            $subjects = array();
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `subject` FROM `feedsSubmitted` WHERE `user`=? AND `feed_id`=?;")){
+                    $stmt->bind_param("sd", $user, $feed_id);
+                    if($stmt->execute()){
+                        $stmt->bind_result($subject);
+                        $i = 0;
+                        while ($stmt->fetch()) {
+                            $subjects[$i] = $subject;
+                            $i++;
+                        }
+                    }
+                }
+            }
+            return $subjects;
         }
 
         function resetStdPass($rollno){
@@ -201,7 +220,7 @@
         function getFacultyScores($br_code){
             $faculties = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT fid, AVG(avg) FROM `ques` WHERE fid IN (SELECT fname FROM `fac_login` WHERE br_code=?) GROUP BY fid ORDER BY AVG(avg) DESC;")){
+                if($stmt = $this->my_conn->prepare("SELECT `fid`, AVG(`avg`) FROM `ques` WHERE fid IN (SELECT fname FROM `fac_login` WHERE br_code=?) GROUP BY `fid` ORDER BY AVG(`avg`) DESC;")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($faculty, $score);
@@ -223,7 +242,7 @@
                 if($stmt=$this->my_conn->prepare("INSERT INTO `subjects_2` (`regulation`,`br_code`,`cr_code`,`branch`,`year`,`sem`,`sub`) VALUES (?,?,?,?,?,?,?);")){
                     $stmt->bind_param("sssssss", $reg, $br_code, $cr_code, $branch, $year, $sem, $sub);
                     if($stmt->execute()){
-                        if($conn->affected_rows){
+                        if($this->my_conn->affected_rows){
                             // subject added successfully
                         }
                     }
@@ -459,6 +478,97 @@
             }
             return "updatefailure";
         }
+
+        function insertComment($facname, $subname, $user, $cmnt, $feed_id){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("INSERT INTO `comments` (`feed_id`, `fname`, `subject`, `stid`, `cmnt`) VALUES (?,?,?,?,?);")){
+                    $stmt->bind_param("dssss", $feed_id, $facname, $subname, $user, $cmnt);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+                            // comment inserted successfully
+                        }
+                    }
+                }
+            }
+        }
+
+        function insertFeedbackData($facname, $br_code, $year, $sem, $reg, $cr_code, $subname, $q1, $q2, $q3, $q4, $q5, 
+                                    $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count, $feed_id, $user){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("INSERT INTO `ques`(`feed_id`, `fid`,`br_code`,`year`,`sem`,`regulation`,`cr_code`,`sid`, `qs1`, `qs2`, `qs3`, `qs4`, `qs5`, `qs6`, `qs7`, `qs8`, `qs9`, `qs10`, `qs11`, `qs12`, `qs13`, `qs14`, `avg`, `count`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);")){
+                    $stmt->bind_param("dsssssssssssssssssssssss", $feed_id, $facname, $br_code, $year, $sem, $reg, $cr_code, $subname, $q1, $q2, $q3, $q4, $q5, $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+                            $this->submitFeed($user, $subname, $feed_id);
+                            return 1;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        function updateFeedbackData($facname, $subname, $q1, $q2, $q3, $q4, $q5, $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count, $feed_id, $user){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("UPDATE `ques` SET `qs1`=?, `qs2`=?, `qs3`=?,`qs4`=?, `qs5`=?, `qs6`=?, `qs7`=?, `qs8`=?, `qs9`=?, `qs10`=?, `qs11`=?, `qs12`=?, `qs13`=?, `qs14`=?, `avg`=?, `count`=? WHERE `feed_id`=? AND `fid`=? AND `sid`=?;")){
+                    $stmt->bind_param("ssssssssssssssssdss", $q1, $q2, $q3, $q4, $q5, $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count, $feed_id, $facname, $subname);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+                            $this->submitFeed($user, $subname, $feed_id);
+                            return 1;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        function submitFeed($user, $subname, $feed_id){
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("INSERT INTO `feedsSubmitted`(`user`, `subject`, `feed_id`) VALUES (?,?,?);")){
+                    $stmt->bind_param("ssd", $user, $subname, $feed_id);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+
+                        }
+                    }
+                }
+            }
+        }
+
+        function checkFeedbackAvailable($facname, $subname, $feed_id){
+            $res = array();
+            $res['status'] = 0;
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `qs1`, `qs2`, `qs3`, `qs4`, `qs5`, `qs6`, `qs7`, `qs8`, `qs9`, `qs10`, `qs11`, `qs12`, `qs13`, `qs14`, `count` FROM `ques` WHERE `fid`=? AND `sid`=? AND `feed_id`=?;")){
+                    $stmt->bind_param("ssd", $facname, $subname, $feed_id);
+                    if($stmt->execute()){
+                        $stmt->bind_result($q1,$q2,$q3,$q4,$q5,$q6,$q7,$q8,$q9,$q10,$q11,$q12,$q13,$q14, $count);
+                        while($stmt->fetch()){
+                            $res['qs1']=$q1;
+							$res['qs2']=$q2;
+							$res['qs3']=$q3;
+							$res['qs4']=$q4;
+							$res['qs5']=$q5;
+							$res['qs6']=$q6;
+							$res['qs7']=$q7;
+							$res['qs8']=$q8;
+							$res['qs9']=$q9;
+							$res['qs10']=$q10;
+							$res['qs11']=$q11;
+							$res['qs12']=$q12;
+							$res['qs13']=$q13;
+							$res['qs14']=$q14;
+							$res['count']=$count;
+							$res['status'] = 1;
+                        }
+                    }
+                }
+            }
+            return $res;
+        }
+
+        
 
     }
 

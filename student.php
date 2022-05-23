@@ -2,6 +2,7 @@
     @session_start();
 	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="student"){
 	    require('header.php');
+        print_r($_SESSION['yes_sub']);
         $branches = array("05"=>"CSE", "01"=>"CIVIL", "02"=>"EEE", "04"=>"ECE", "03"=>"MECH", "07"=>"FDT");
         $questions = array();
         $questions[0] = "Teacher comes to the class on time";
@@ -48,19 +49,20 @@
                     <input type="hidden" name="roll" id="roll" value="<?php echo $_SESSION['roll']; ?>">
 				</div>
                 <div class="row">
-                    <form action="" method="post">
+                    <form action="feedform.php" method="post">
                         <table style="width:100%">
                             <tbody>
                                 <tr>
                                     <td>Subject Name : 
-                                        <select class="form-select-md" name="subname" id="subname">
+                                        <select class="form-select-md" name="subname" id="subname" required>
                                             <option value="">Select</option>
                                         </select>
                                     </td>
                                     <td>Class : <?php echo $_SESSION['year'].' B.TECH '.$_SESSION['sem'];?></td>
                                 </tr>
                                 <tr>
-                                    <td>Faculty Name : <span id="facname"></span>
+                                    <td>Faculty Name : <span id="facnameshow"></span>
+                                        <input type="hidden" name="facname" id="facname">
                                     </td>
                                     <td>Branch : <?php echo $branches[$_SESSION['br_code']];?> </td>
                                 </tr>
@@ -94,7 +96,7 @@
                             </tbody>
                         </table>
                         <div class="form-floating">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+                            <textarea name="cmnt" class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
                             <label for="floatingTextarea2">Comments</label>
                         </div>
                         <div class="row justify-content-center pt-2">
@@ -130,7 +132,8 @@
                 data:{subname:_subnmae},
                 dataType:"text",
                 success:function(data){
-                    $("#facname").html(data);
+                    $("#facnameshow").html(data);
+                    $("#facname").val(data);
                 }
             });
         });

@@ -1,6 +1,6 @@
 <?php 
     @session_start();
-    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']="admin"){
+    if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
         require('header.php');
 
         // connection
