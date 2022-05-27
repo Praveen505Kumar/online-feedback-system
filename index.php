@@ -68,7 +68,7 @@
                                         <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                                     </svg>
                                 </span>
-                                <input type="text" class="form-control" id="uname" name="username" placeholder="XXKA1AXXXX" aria-describedby="adminnumber" required>
+                                <input type="text" class="form-control" id="uname" name="username" placeholder="XXXXXXXXXX" aria-describedby="adminnumber" required>
                             </div>
                         </div>
                         <div class="mb-3 input-group">

@@ -3,6 +3,7 @@
     date_default_timezone_set("Asia/Kolkata");
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="admin"){
         require('header.php');
+        $today = date("Y-m-d\TH:i", time()-100);
 
         // connection
         require("Operations.php");
@@ -10,7 +11,6 @@
 
         // deactivate feedback
         if(!empty($_POST['feed_id'])){
-            $today = date("Y-m-d\TH:i", time()-100);
             $feed_id = $_POST['feed_id'];
             
             $msg = $opt->deactive($today, $feed_id);

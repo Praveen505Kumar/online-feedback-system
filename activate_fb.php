@@ -9,6 +9,18 @@
 
         // getting regulation
         $regulation = $opt->getRegulation();
+        if (!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['fromdate']) && !empty($_POST['todate'])){
+            $reg = $_POST['regulation'];
+            $year = $_POST['year'];
+            $sem = $_POST['sem'];
+            $fromdate = $_POST['fromdate'];
+            $todate = $_POST['todate'];
+            $br_code = $_SESSION['br_code'];
+            $today = date("Y-m-d\TH:i", time());
+            // activate feedback
+            $res = $opt->activateFeedback($reg, $year, $sem ,$fromdate, $todate, $br_code, $today);
+        }
+        
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -34,25 +46,31 @@
             </div>
             <div class="container text-center">
                 <?php
-                    if(!empty($_GET['msg']) && $_GET['msg']=='feedback_activated'){
+                    if($res == 'feedback_activated'){
                         echo "<div class='alert alert-success'>Feedback Activated Successfully</div>";
                     }
-                    else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_not_activated'){
+                    else if($res == 'feedback_not_activated'){
                         echo "<div class='alert alert-danger'>Feedback Not Activated..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='feedback_exists'){
+                    }else if($res == 'feedback_exists'){
                         echo "<div class='alert alert-warning'>Feedback Exists..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='start_end_time_error'){
+                    }else if($res == 'start_end_time_error'){
                         echo "<div class='alert alert-warning'>From DateTime Value > To DateTime Value..!</div>";
-                    }else if(!empty($_GET['msg']) && $_GET['msg']=='end_time_error'){
+                    }else if($res == 'end_time_error'){
                         echo "<div class='alert alert-warning'>To DateTime Value is Invalid/Expired..!</div>";
+                    }else if($res == 'feedback_not_activated2'){
+                        echo "<div class='alert alert-warning'>Feedback2 error</div>";
+                    }else if($res == 'error'){
+                        echo "<div class='alert alert-warning'>Error while doing opetion</div>";
                     }
+                    
+
                 ?>
             </div>
             <div class="card cards content text-center mt-5" style="max-width:500px;">
                 
                 <div class="card-header" style="font-weight: bold;">Select The Following</div>
                 <div class="card-body">
-                    <form action="active.php" roll="form" method="post">
+                    <form action="activate_fb.php" roll="form" method="POST">
                         <div class="mb-3">
                             <div class="mb-3 row">
                                 <label class="col-sm-6 col-form-label" style="font-weight: bold;" for="regulation">Select Regulation&emsp;:&emsp;</label>

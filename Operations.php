@@ -57,6 +57,46 @@
             $res['status'] =  "failure";
             return $res;
         }
+
+        function activateFeedback($reg, $year, $sem ,$fromdate, $todate, $br_code, $today){
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `branch`=? AND `year`=? AND `sem`=?;")){
+                    $stmt->bind_param("ssss", $reg, $br_code, $year, $sem);
+                    if($stmt->execute()){
+                        $stmt->bind_result($id, $from_date, $to_date);
+                        
+                        $stmt->fetch();
+                        if(!empty($from_date) && !empty($to_date) && $from_date <= $today && $today <= $to_date){
+                            return 'feedback_exists';
+                        }else{
+                            if($fromdate >= $todate){
+                                return 'start_end_time_error';
+                            }else if($todate <= $today){
+                                return 'end_time_error';
+                            }else{
+                                // activate feedback
+                                $stmt->close();
+                                $cr_code = "A";
+                                $query = "INSERT INTO `activation` (`regulation`,`cr_code`,`branch`,`year`,`sem`,`from_date`,`to_date`) VALUES(?,?,?,?,?,?,?)";
+                                if ($stmt = $this->my_conn->prepare($query)) {
+                                    $stmt->bind_param("sssssss", $reg, $cr_code, $br_code, $year, $sem, $fromdate, $todate);
+                                    if($stmt->execute()){
+                                        if($this->my_conn->affected_rows){
+                                            return 'feedback_activated';
+                                        }else{
+                                            return 'feedback_not_activated';
+                                        }
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+            }
+            return 'error';
+        }
+
         function getDepartment(){
             $branches = array();
             if($this->my_error==0 && !empty($this->my_conn)){
@@ -106,7 +146,7 @@
         function getActiveFeedbackByBranch($br_code){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT id, regulation, year, sem, from_date, to_date FROM `activation` WHERE `branch`=? ORDER BY `regulation`, `year`, `sem`;")){
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `regulation`, `year`, `sem`, `from_date`, `to_date` FROM `activation` WHERE `branch`=? ORDER BY `regulation`, `year`, `sem`;")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($feed_id, $reg, $year, $sem, $from_date, $to_date);
