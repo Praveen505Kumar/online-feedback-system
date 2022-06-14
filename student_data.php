@@ -85,7 +85,7 @@
                 ?>
                 
             </div>
-            <div class="">
+            <div class="mt-5">
                 <div class="row">
                     <form action="" method="post">
                         <div class="mb-4 row">
@@ -123,7 +123,7 @@
                         </div>
                     </form>
                 </div>
-                <table class="table table-success table-hover  border-success text-center">
+                <table class="table table-light table-hover  border-success text-center">
                         <thead>
                             <tr>
                                 <th scope="col">S.No</th>

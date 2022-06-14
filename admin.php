@@ -6,15 +6,19 @@
         $br_codes = array("CSE"=>05, "CIVIL"=>01, "EEE"=>02, "ECE"=>04, "MECH"=>03, "FDT"=>07);
         
         if(!empty($_POST['dept'])){
-            $_SESSION['br_code'] = $br_codes[$_POST['dept']];
-            $_SESSION['branch'] = $_POST['dept'];
+            $code = explode("-", $_POST['dept']);
+            $_SESSION['br_code'] = $code[1];
+            $_SESSION['branch'] = $code[0];
+            
         }
 
         // connection
         require("Operations.php");
         $opt = new Operations();
         // getting departments
-        $branches = $opt->getDepartment();
+        $result = $opt->getDepartment();
+        $branches = $result[0];
+        $br_codes = $result[1];
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -50,9 +54,9 @@
                             <select name="dept" required>
                                         <option value="">--Select Department--</option>
                                         <?php
-                                            foreach($branches as $branch){
-                                                echo '<option value="'.$branch.'">'.$branch.'</option>';
-                                            } 
+                                            for($i=0;$i<sizeof($branches);$i++){
+                                                echo '<option value="'.$branches[$i].'-'.$br_codes[$i].'">'.$branches[$i].'</option>';
+                                            }
                                         ?>
                                     
                             </select>

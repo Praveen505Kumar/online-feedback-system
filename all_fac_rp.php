@@ -2,20 +2,14 @@
     @session_start();
     if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && ($_SESSION['priv']=="hod" || $_SESSION['priv']=="admin")){
         require('header.php');
+        
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
 
-        require("config/db_connect.php");
-        // getting regulations
-        if($stmt = $conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
-            if($stmt->execute()){
-                $stmt->bind_result($reg);
-                $i=0;
-                $regulation = array();
-                while($stmt->fetch()){
-                    $regulation[$i]=$reg;
-                    $i++;
-                }
-            }
-        }
+        // getting regulation
+        $regulation = $opt->getRegulation();
+
 ?>
 <div class="container ms-0">
     <div class="row">
@@ -66,7 +60,7 @@
                 
                 <div class="card-header" style="font-weight: bold;">Select The Following</div>
                 <div class="card-body">
-                    <form action="active.php" roll="form" method="post">
+                    <form action="allfacpdf.php" roll="form" method="POST">
                         <div class="mb-3">
                             <div class="mb-3 row">
                                 <label class="col-sm-6 col-form-label" style="font-weight: bold;" for="reg">Select Regulation&emsp;:&emsp;</label>
@@ -113,7 +107,7 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary sb-btn px-5">Get Report</button>
+                        <button type="submit" class="btn btn-primary sb-btn px-5">Download Individual Reports</button>
                     </form>
                 </div>
             </div>

@@ -48,7 +48,7 @@
                 ?>
             </div>
             <div class="">
-                <table class="table table-danger table-hover  border-success text-center">
+                <table class="table table-light table-hover  border-success text-center">
                     <thead>
                         <tr>
                             <th scope="col">S.No</th>

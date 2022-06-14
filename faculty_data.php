@@ -55,7 +55,7 @@
                     if(!empty($_SESSION['branch']) && $_SESSION['branch']=="all"){
                         echo "None";
                     }else{
-                        echo $_SESSION['branch'];
+                        echo $_SESSION['branch'] ;
                     }
                     echo "</h4>";
                     if($msg == "setsuccess"){
@@ -74,8 +74,8 @@
                     }
                 ?>
             </div>
-            <div class="">
-                <table class="table table-success table-hover  border-success text-center">
+            <div class="mt-5">
+                <table class="table table-light table-hover  border-success text-center">
                     <thead>
                         <tr>
                             <th scope="col">S.No</th>

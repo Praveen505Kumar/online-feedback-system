@@ -1,6 +1,6 @@
 <?php
     @session_start();
-	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="hod"){
+	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv'] == "hod"){
 	    require('header.php');
         
 ?>

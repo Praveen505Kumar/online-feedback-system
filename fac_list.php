@@ -34,8 +34,8 @@
                     echo "</h4>"; 
                 ?>
             </div>
-            <div class="container">
-                <table class="table table-dark table-hover table-bordered border-primary">
+            <div class="container mt-5">
+                <table class="table table-light table-hover table-bordered border-primary">
                     <thead>
                         <tr>
                             <th scope="col">S.No.</th>

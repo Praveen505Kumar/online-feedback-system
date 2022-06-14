@@ -99,19 +99,23 @@
 
         function getDepartment(){
             $branches = array();
+            $br_codes = array();
             if($this->my_error==0 && !empty($this->my_conn)){
-                if($stmt=$this->my_conn->prepare("SELECT DISTINCT `branch` FROM `fac_login` ORDER BY `br_code`;")){
+                if($stmt = $this->my_conn->prepare("SELECT DISTINCT `branch`, `br_code` FROM `fac_login` ORDER BY `br_code`;")){
                     if($stmt->execute()){
-                        $stmt->bind_result($branch);
+                        $stmt->bind_result($branch, $br_code);
                         $i=0;
                         while($stmt->fetch()){
-                            if($branch != "HMS")
-                                $branches[$i++] = $branch;
+                            if($branch != "HMS" && !in_array($branch, $branches) ){
+                                $branches[$i] = $branch;
+                                $br_codes[$i] = $br_code;
+                                $i++;
+                            }
                         }
                     }
                 }
             }
-            return $branches;
+            return array($branches, $br_codes);
         }
 
         function getRegulation(){
@@ -608,7 +612,122 @@
             return $res;
         }
 
-        
+        function uploadStudentData($sid, $email, $spass, $privilege, $cr_code, $regulation, $year, $sem, $br_code, $status, $otp_status, $feedback_status){
+            
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("INSERT IGNORE INTO `st_login` (`sid`, `email`, `spass`, `privilege`, `cr_code`, `regulation`, `year`, `sem`, `br_code`, `status`, `otp_status`, `feedback_status`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);")){
+                    $stmt->bind_param("sssssssssiii", $sid, $email, $spass, $privilege, $cr_code, $regulation, $year, $sem, $br_code, $status, $otp_status, $feedback_status);
+                    if($stmt->execute()){
+                        if($this->my_conn->affected_rows){
+                            return 'success';
+                        }
+                    }
+                }
+            }
+            return "failure";
+        }
+
+        function uploadFacultyData($fname, $br_code, $branch, $fuser, $fpass, $priv, $email, $otp_status){
+            
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt=$this->my_conn->prepare("INSERT IGNORE INTO `fac_login` (`fname`, `br_code`, `branch`, `fuser`, `fpass`, `privilege`, `email`, `otp_status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);")){
+                    
+                    $stmt->bind_param("sssssssi", $fname, $br_code, $branch, $fuser, $fpass, $priv, $email, $otp_status);
+                    if($stmt->execute()){ 
+                        if($this->my_conn->affected_rows){
+                            return 'success1';
+                        }
+                    }
+                }
+            }
+            return "failure1";
+        }
+
+        function getReportDetails($br_code, $year, $sem, $reg, $cr_code, $feed_id){
+            $result = array();
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `fid`,`sid`,`avg`, `count` FROM `ques` WHERE `br_code`=? AND `year`=? AND `sem`=? AND `regulation`=? AND `cr_code`=? AND `feed_id`=?;")){
+                    $stmt->bind_param("dssssd", $br_code, $year, $sem, $reg, $cr_code, $feed_id);
+                    if($stmt->execute()){
+                        $stmt->bind_result($facname, $subname, $avg, $count);
+                        $i=0;
+                        while($stmt->fetch()){
+                            $result[$i]['facname'] = $facname;
+                            $result[$i]['subname'] = $subname;
+                            $result[$i]['avg'] = $avg;
+                            $result[$i]['count'] = $count;
+                            $i++;
+                        }
+                    }
+                }
+            }
+            return $result;
+        }
+
+        function getQuestionsPer($facname, $subject, $feed_id){
+            $questions = array();
+
+            $questions[0][0] = "Teacher comes to the class on time";
+            $questions[0][1] = "Teacher speaks clearly and audibly";
+            $questions[0][2] = "Teacher plans lesson with clear objective";
+            $questions[0][3] = "Teacher has got command on the subject";
+            $questions[0][4] = "Teacher writes and draws legibly";
+            $questions[0][5] = "Teacher asks qstions to promote interaction and effective thinking";
+            $questions[0][6] = "Teacher encourages,compliments and praises originality and creativity displayed by the student";
+            $questions[0][7] = "Teacher is courteous and impartial in dealing with the students";
+            $questions[0][8] = "Teacher covers the syllabus completely";
+            $questions[0][9] = "Teacher evaluation of the sessional exams answer scripts,lab records etc is fair and impartial";
+            $questions[0][10] = "Teacher is prompt in valuing and returning the answer scripts providing feedback on performanc";
+            $questions[0][11] = "Teacher offers assistance and counseling to the needy students";
+            $questions[0][12] = "Teacher imparts the practical knowledge concerned to the subject";
+            $questions[0][13] = "Teacher leaves the class on time";
+
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT  `qs1`, `qs2`, `qs3`, `qs4`, `qs5`, `qs6`, `qs7`, `qs8`, `qs9`, `qs10`, `qs11`, `qs12`, `qs13`, `qs14`, `avg`, `count` FROM `ques` WHERE `fid`=? AND  `sid`=? AND `feed_id`=?; ")){
+                    $stmt->bind_param("ssd", $facname, $subject, $feed_id);
+                    if($stmt->execute()){
+                        $stmt->bind_result($qs1, $qs2, $qs3, $qs4, $qs5, $qs6, $qs7, $qs8, $qs9, $qs10, $qs11, $qs12, $qs13, $qs14, $avg, $count);
+                        while($stmt->fetch()){
+                            $questions[1][0] = $qs1;
+                            $questions[1][1] = $qs2;
+                            $questions[1][2] = $qs3;
+                            $questions[1][3] = $qs4;
+                            $questions[1][4] = $qs5;
+                            $questions[1][5] = $qs6;
+                            $questions[1][6] = $qs7;
+                            $questions[1][7] = $qs8;
+                            $questions[1][8] = $qs9;
+                            $questions[1][9] = $qs10;
+                            $questions[1][10] = $qs11;
+                            $questions[1][11] = $qs12;
+                            $questions[1][12] = $qs13;
+                            $questions[1][13] = $qs14;
+                            $questions['stdcount'] = $count;
+                            $questions['average'] = $avg;
+                        }
+                    }
+                }
+            }
+            return $questions;
+        }
+
+        function getComments($facname, $subject, $feed_id){
+            $comments = array();            
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT DISTINCT `cmnt` FROM `comments` WHERE `fname`=? AND `subject`=? AND `feed_id`=?;")){
+                    $stmt->bind_param("ssd", $facname, $subject, $feed_id);
+                    if($stmt->execute()){
+                        $stmt->bind_result($comment);
+                        $i=0;
+                        while($stmt->fetch()){
+                            $comments[$i] = $comment;
+                            $i++;
+                        }
+                    }
+                }
+            }
+            return $comments;
+        }
 
     }
 

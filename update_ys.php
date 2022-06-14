@@ -49,7 +49,7 @@
                 ?>
             </div>
             
-            <form action="" method="post">
+            <form action="" method="post" class="bg-white rounded p-3 mt-5">
                 <h2 class="text-center">FROM</h2>
                 <div class="mb-4 row justify-content-center">
                     <label class="col-auto col-form-label" style="font-weight: bold;" for="fromreg">Regulation:</label>

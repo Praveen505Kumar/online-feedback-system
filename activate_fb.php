@@ -9,6 +9,8 @@
 
         // getting regulation
         $regulation = $opt->getRegulation();
+        
+        // activate feedback
         if (!empty($_POST['regulation']) && !empty($_POST['year']) && !empty($_POST['sem']) && !empty($_POST['fromdate']) && !empty($_POST['todate'])){
             $reg = $_POST['regulation'];
             $year = $_POST['year'];
@@ -17,7 +19,6 @@
             $todate = $_POST['todate'];
             $br_code = $_SESSION['br_code'];
             $today = date("Y-m-d\TH:i", time());
-            // activate feedback
             $res = $opt->activateFeedback($reg, $year, $sem ,$fromdate, $todate, $br_code, $today);
         }
         

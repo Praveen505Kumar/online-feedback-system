@@ -8,16 +8,16 @@
         $year = $_POST['year'];
         $sem = $_POST['sem'];
         $br_code = $_SESSION['br_code'];
-        if($stmt =  $conn->prepare("SELECT from_date, to_date FROM `activation` WHERE regulation=? AND year=? AND sem=? AND branch=?;")){
+        if($stmt =  $conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `branch`=?;")){
             
             $stmt->bind_param("ssss", $reg, $year, $sem, $br_code);
             if($stmt->execute()){
-                $stmt->bind_result($from_date, $to_date);
+                $stmt->bind_result($feed_id, $from_date, $to_date);
                 $res = "";
                 while($stmt->fetch()){
                     $fromdate = date('d-m-Y', strtotime($from_date));
                     $todate = date('d-m-Y', strtotime($to_date));
-                    $temp = $fromdate.'_'.$todate;
+                    $temp = $feed_id.'_'.$fromdate.'_'.$todate;
                     $res .= "<option value='".$temp."'>".$fromdate." - ".$todate."</option>";
                 }
                 echo $res;
