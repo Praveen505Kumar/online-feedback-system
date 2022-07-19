@@ -7,15 +7,15 @@
         $opt = new Operations();
         $facname = $_POST['facname'];
         $subname = $_POST['subname'];
-        echo $_POST['cmnt'];
-        echo $facname.$subname;
+        // echo $_POST['cmnt'];
+        // echo $facname.$subname;
         $br_code = $_SESSION['br_code'];
         $cr_code = "A";
         $year = $_SESSION['year'];
         $sem = $_SESSION['sem'];
         $reg = $_SESSION['reg'];
         $rollno = $_SESSION['roll'];
-        $today = date("Y-m-d\TH:i",time());	
+        $today = date("Y-m-d\TH:i", time());
         // getting active feedbacks
         $feedbacks = $opt->getActiveFeedbackByStudent($br_code, $year, $sem, $reg);
         $temp = 0;
@@ -27,7 +27,7 @@
                     header('Location: student.php');
                 }else{
                     if(!empty($facname) && !empty($subname)){
-                        // insert comments in ti comment table if comment exist.
+                        // insert comments in the comment table if comment exist.
                         if(!empty($_POST['cmnt'])){
                             $opt->insertComment($facname, $subname, $rollno, $_POST['cmnt'], $feed_id);
                         }
@@ -88,7 +88,7 @@
                         }
                         if($insupdres){
                             // remove below line
-                            $_SESSION['count']++;
+                            // $_SESSION['count']++;
                             header('Location:student.php');
                         }else{
                             echo "data not inserted";

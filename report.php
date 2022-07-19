@@ -15,7 +15,7 @@
             $opt = new Operations();
 
             $facname = $_POST['facname'];
-            $data = explode('-', $_POST['subject']);
+            $data = explode('_', $_POST['subject']);
             $subject = $data[0];
             $feed_id = $data[1];
 
@@ -75,7 +75,7 @@
                 </div>
                 <div class="col-2">
                     <?php 
-                        echo '<a href="printpdf.php?facname='.urlencode($facname).'&subject='.urlencode($subject).'" class="btn btn-primary sb-btn px-5 mt-3">Print</a>';
+                        echo '<a href="printpdf.php?facname='.urlencode($facname).'&subject='.urlencode($subject).'&feed_id='.urldecode($feed_id).'&'.'" class="btn btn-primary sb-btn px-5 mt-3">Print</a>';
                     ?>
                 </div>
             </div>

@@ -25,9 +25,9 @@
                     <label for="uname" class="names">Select The Following</label>
                 </div>
                 <div class="card-body">
-                    <form action="report.php" method="post">
+                    <form action="report.php" method="POST">
                         <div class="mb-3 row">
-                            <input type='hidden' name='user' id="user" value='<?php echo $_SESSION['user']; ?>' />
+                            <input type='hidden' name='facname' id="facname" value='<?php echo $_SESSION['user']; ?>' />
                             <label class="col-sm-5 col-form-label" for="subject" style="font-weight: bold;">Select Subject: &emsp;</label>
                             <div class="col-sm-6">
                                 <select class="form-select" name="subject" id="subject" required>
@@ -48,7 +48,7 @@
 </div>
 <script>
     $(document).ready(function(){
-        var faculty = $('#user').val();
+        var faculty = $('#facname').val();
         $.ajax({
             url:"config/ajaxpost.php",
             method:"POST",

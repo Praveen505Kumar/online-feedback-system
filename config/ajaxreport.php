@@ -8,9 +8,9 @@
         $year = $_POST['year'];
         $sem = $_POST['sem'];
         $br_code = $_SESSION['br_code'];
-        if($stmt =  $conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `branch`=?;")){
+        if($stmt =  $conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
             
-            $stmt->bind_param("ssss", $reg, $year, $sem, $br_code);
+            $stmt->bind_param("sssd", $reg, $year, $sem, $br_code);
             if($stmt->execute()){
                 $stmt->bind_result($feed_id, $from_date, $to_date);
                 $res = "";

@@ -14,7 +14,7 @@
                 $res = "";
                 while($stmt->fetch()){
                     $fromdate = date('d-m-Y',strtotime($from_date));
-                    $res .= "<option value='".$subject."-".$feed_id."'>".$branch." - ".$year." - ".$sem." - ".$subject." - ".$fromdate."</option>";
+                    $res .= "<option value='".$subject."_".$feed_id."'>".$branch." - ".$year." - ".$sem." - ".$subject." - ".$fromdate."</option>";
                 }
                 echo $res;
             }

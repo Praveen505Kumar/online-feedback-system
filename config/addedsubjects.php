@@ -62,10 +62,11 @@
         $year = $_SESSION["year"];
         $sem = $_SESSION["sem"];
         $subjects = array();
+        $filtersubjects = array();
         $i = 0;
         $res = "<option value=''>Select</option>";
         if($stmt =  $conn->prepare("SELECT `sub` FROM `subjects_2` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
-            $stmt->bind_param("ssss", $reg, $year, $sem, $br_code);
+            $stmt->bind_param("sssd", $reg, $year, $sem, $br_code);
             if($stmt->execute()){
                 $stmt->bind_result($subject);
                 while($stmt->fetch()){
@@ -84,8 +85,20 @@
             }
             $stmt->close();
         }
-        $submittedsub = $opt->getFeedsSubmitted($_SESSION['roll'], 38);
-        foreach($subjects as $subject){
+        $i=0;
+        if($stmt =  $conn->prepare("SELECT `subject` FROM `fac_course` WHERE `regulation`=? AND `year`=? AND `sem`=? AND `br_code`=?;")){
+            $stmt->bind_param("sssd", $reg, $year, $sem, $br_code);
+            if($stmt->execute()){
+                $stmt->bind_result($subject);
+                while($stmt->fetch()){
+                    if(in_array($subject, $subjects))
+                        $filtersubjects[$i++] = $subject;   
+                }
+            }
+            $stmt->close();
+        }
+        $submittedsub = $opt->getFeedsSubmitted($_SESSION['roll']);
+        foreach($filtersubjects as $subject){
             if(empty($submittedsub)){
                 $res .= "<option value='$subject'>$subject</option>";   
             }

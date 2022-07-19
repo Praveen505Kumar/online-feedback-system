@@ -131,7 +131,11 @@
             </div>
             <div class="text-secondary bg-white rounded p-3">
                 <h3>Note : </h3>
-                <p>If you want to add new regulation then upload student details with that regulation and similary for new branch.</p>
+                <p>1.If you want to add new regulation then upload student details with that regulation and similary for new branch.</p>
+                <p>2.Faculty Data Format :</p>
+                <p>Fac Name, Br_code, Branch, Username, Password, Privilege, Email.</p>
+                <p>3.Student Data Format :</p>
+                <p>Roll No, Name, Password, Regulation, Year, Sem, Br_code.</p>
             </div>
     
         </div>

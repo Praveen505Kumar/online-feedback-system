@@ -1,9 +1,13 @@
 <?php
     @session_start();
 	if(!empty($_SESSION['user']) && !empty($_SESSION['priv']) && $_SESSION['priv']=="student"){
-	    require('header.php');
-        print_r($_SESSION['yes_sub']);
-        $branches = array("05"=>"CSE", "01"=>"CIVIL", "02"=>"EEE", "04"=>"ECE", "03"=>"MECH", "07"=>"FDT");
+	    require('header.php'); 
+        //print_r($_SESSION['yes_sub']);
+        //$branches = array("05"=>"CSE", "01"=>"CIVIL", "02"=>"EEE", "04"=>"ECE", "03"=>"MECH", "07"=>"FDT");
+        // connection
+        require("Operations.php");
+        $opt = new Operations();
+        $branches = $opt->branchBrCodesMap();
         $questions = array();
         $questions[0] = "Teacher comes to the class on time";
         $questions[1] = "Teacher speaks clearly and audibly";
@@ -49,7 +53,7 @@
                     <input type="hidden" name="roll" id="roll" value="<?php echo $_SESSION['roll']; ?>">
 				</div>
                 <div class="row">
-                    <form action="feedform.php" method="post">
+                    <form action="feedform.php" method="POST">
                         <table style="width:100%">
                             <tbody>
                                 <tr>

@@ -15,23 +15,26 @@
             }
         }
 
-        function checkLogin($username, $password){
+        function checkStaffLogin($username, $password){
+            $res = array();
             if($this->my_error==0 && !empty($this->my_conn)){
                 if($stmt=$this->my_conn->prepare("SELECT `privilege`, `br_code`, `branch`, `fname` FROM `fac_login` WHERE `fuser`=? AND `fpass`=?;")){
                     $stmt->bind_param("ss", $username, $password);
                     if($stmt->execute()){
                         $stmt->bind_result($priv, $br_code, $branch, $facname);
                         while($stmt->fetch()){
-                            $_SESSION['priv']= $priv;
-                            $_SESSION['br_code']= $br_code;
-                            $_SESSION['branch']= $branch;
-                            $_SESSION['user']= $facname;
-
-                            return $priv;
+                            $res['priv']= $priv;
+                            $res['br_code']= $br_code;
+                            $res['branch']= $branch;
+                            $res['user']= $facname;
+                            $res['status'] =  "success";
+                            return $res;
                         }
                     }
                 }
             }
+            $res['status'] =  "failure";
+            return $res;
         }
         
         function checkStudentLogin($username, $password){
@@ -60,8 +63,8 @@
 
         function activateFeedback($reg, $year, $sem ,$fromdate, $todate, $br_code, $today){
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `branch`=? AND `year`=? AND `sem`=?;")){
-                    $stmt->bind_param("ssss", $reg, $br_code, $year, $sem);
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `regulation`=? AND `br_code`=? AND `year`=? AND `sem`=?;")){
+                    $stmt->bind_param("sdss", $reg, $br_code, $year, $sem);
                     if($stmt->execute()){
                         $stmt->bind_result($id, $from_date, $to_date);
                         
@@ -77,7 +80,7 @@
                                 // activate feedback
                                 $stmt->close();
                                 $cr_code = "A";
-                                $query = "INSERT INTO `activation` (`regulation`,`cr_code`,`branch`,`year`,`sem`,`from_date`,`to_date`) VALUES(?,?,?,?,?,?,?)";
+                                $query = "INSERT INTO `activation` (`regulation`,`cr_code`,`br_code`,`year`,`sem`,`from_date`,`to_date`) VALUES(?,?,?,?,?,?,?)";
                                 if ($stmt = $this->my_conn->prepare($query)) {
                                     $stmt->bind_param("sssssss", $reg, $cr_code, $br_code, $year, $sem, $fromdate, $todate);
                                     if($stmt->execute()){
@@ -118,10 +121,27 @@
             return array($branches, $br_codes);
         }
 
+        function branchBrCodesMap(){
+            $branches = array();
+            if($this->my_error==0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT DISTINCT `branch`, `br_code` FROM `fac_login` ORDER BY `br_code`;")){
+                    if($stmt->execute()){
+                        $stmt->bind_result($branch, $br_code);
+                        while($stmt->fetch()){
+                            if($branch != "HMS" && !in_array($branch, $branches) ){
+                                $branches[$br_code] = $branch;
+                            }
+                        }
+                    }
+                }
+            }
+            return $branches;
+        }
+
         function getRegulation(){
             $regulation = array();
             if($this->my_error==0 && !empty($this->my_conn)){
-                if($stmt=$this->my_conn->prepare("SELECT DISTINCT `regulation` FROM `subjects_2`;")){
+                if($stmt=$this->my_conn->prepare("SELECT DISTINCT `regulation` FROM `st_login` ORDER BY `regulation`;")){
                     if($stmt->execute()){
                         $stmt->bind_result($reg);
                         $i=0;
@@ -138,8 +158,9 @@
             if($this->my_error==0 && !empty($this->my_conn)){
                 if($stmt=$this->my_conn->prepare("UPDATE `activation` SET `to_date`=? WHERE `id`=?;")){
                     $stmt->bind_param("sd", $today, $feed_id);
+                    
                     if($stmt->execute()){
-                        if($conn->affected_rows){
+                        if($this->my_conn->affected_rows){
                             return "feed_deactive";
                         }
                     }
@@ -150,7 +171,7 @@
         function getActiveFeedbackByBranch($br_code){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `id`, `regulation`, `year`, `sem`, `from_date`, `to_date` FROM `activation` WHERE `branch`=? ORDER BY `regulation`, `year`, `sem`;")){
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `regulation`, `year`, `sem`, `from_date`, `to_date` FROM `activation` WHERE `br_code`=? ORDER BY `regulation`, `year`, `sem`;")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($feed_id, $reg, $year, $sem, $from_date, $to_date);
@@ -160,8 +181,8 @@
                             $feedbacks[$i]['reg'] = $reg;
                             $feedbacks[$i]['year'] = $year;
                             $feedbacks[$i]['sem'] = $sem;
-                            $feedbacks[$i]['from_date'] = date("Y-m-d\TH:i", strtotime($from_date));
-                            $feedbacks[$i]['to_date'] = date("Y-m-d\TH:i", strtotime($to_date));
+                            $feedbacks[$i]['from_date'] = date("Y-m-d H:i:s", strtotime($from_date));
+                            $feedbacks[$i]['to_date'] = date("Y-m-d H:i:s", strtotime($to_date));
                             $i++;
                         }
                     }
@@ -173,7 +194,7 @@
         function getActiveFeedbackByStudent($br_code, $year, $sem, $reg){
             $feedbacks = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `branch`=? AND `year`=? AND `sem`=? AND `regulation`=?;")){
+                if($stmt = $this->my_conn->prepare("SELECT `id`, `from_date`, `to_date` FROM `activation` WHERE `br_code`=? AND `year`=? AND `sem`=? AND `regulation`=?;")){
                     $stmt->bind_param("dssd", $br_code, $year, $sem, $reg);
                     if($stmt->execute()){
                         $stmt->bind_result($id, $from_date, $to_date);
@@ -190,11 +211,11 @@
             return $feedbacks;
         }
 
-        function getFeedsSubmitted($user, $feed_id){
+        function getFeedsSubmitted($user){
             $subjects = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `subject` FROM `feedsSubmitted` WHERE `user`=? AND `feed_id`=?;")){
-                    $stmt->bind_param("sd", $user, $feed_id);
+                if($stmt = $this->my_conn->prepare("SELECT `subject` FROM `feedsSubmitted` WHERE `user`=?;")){
+                    $stmt->bind_param("s", $user);
                     if($stmt->execute()){
                         $stmt->bind_result($subject);
                         $i = 0;
@@ -247,7 +268,7 @@
         function getFaultyList($br_code){
             $faculties = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT DISTINCT `fname` FROM `fac_login` WHERE `br_code`=? AND `privilege` LIKE '%staff%';")){
+                if($stmt = $this->my_conn->prepare("SELECT DISTINCT `fname` FROM `fac_login` WHERE `br_code`=? AND (`privilege` LIKE '%staff%' OR  `privilege` LIKE '%hod%');")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($faculty);
@@ -264,7 +285,7 @@
         function getFacultyScores($br_code){
             $faculties = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `fid`, AVG(`avg`) FROM `ques` WHERE fid IN (SELECT fname FROM `fac_login` WHERE br_code=?) GROUP BY `fid` ORDER BY AVG(`avg`) DESC;")){
+                if($stmt = $this->my_conn->prepare("SELECT `fid`, AVG(`avg`) FROM `ques` WHERE `fid` IN (SELECT `fname` FROM `fac_login` WHERE `br_code`=?) GROUP BY `fid` ORDER BY AVG(`avg`) DESC;")){
                     $stmt->bind_param("d", $br_code);
                     if($stmt->execute()){
                         $stmt->bind_result($faculty, $score);
@@ -540,7 +561,7 @@
                                     $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count, $feed_id, $user){
             if($this->my_error==0 && !empty($this->my_conn)){
                 if($stmt=$this->my_conn->prepare("INSERT INTO `ques`(`feed_id`, `fid`,`br_code`,`year`,`sem`,`regulation`,`cr_code`,`sid`, `qs1`, `qs2`, `qs3`, `qs4`, `qs5`, `qs6`, `qs7`, `qs8`, `qs9`, `qs10`, `qs11`, `qs12`, `qs13`, `qs14`, `avg`, `count`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);")){
-                    $stmt->bind_param("dsssssssssssssssssssssss", $feed_id, $facname, $br_code, $year, $sem, $reg, $cr_code, $subname, $q1, $q2, $q3, $q4, $q5, $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count);
+                    $stmt->bind_param("dsdsssssssssssssssssssss", $feed_id, $facname, $br_code, $year, $sem, $reg, $cr_code, $subname, $q1, $q2, $q3, $q4, $q5, $q6, $q7, $q8, $q9, $q10, $q11, $q12, $q13, $q14, $avg, $count);
                     if($stmt->execute()){
                         if($this->my_conn->affected_rows){
                             $this->submitFeed($user, $subname, $feed_id);
@@ -569,7 +590,7 @@
 
         function submitFeed($user, $subname, $feed_id){
             if($this->my_error==0 && !empty($this->my_conn)){
-                if($stmt=$this->my_conn->prepare("INSERT INTO `feedsSubmitted`(`user`, `subject`, `feed_id`) VALUES (?,?,?);")){
+                if($stmt=$this->my_conn->prepare("INSERT INTO `feedssubmitted`(`user`, `subject`, `feed_id`) VALUES (?,?,?);")){
                     $stmt->bind_param("ssd", $user, $subname, $feed_id);
                     if($stmt->execute()){
                         if($this->my_conn->affected_rows){
@@ -646,7 +667,7 @@
         function getReportDetails($br_code, $year, $sem, $reg, $cr_code, $feed_id){
             $result = array();
             if($this->my_error == 0 && !empty($this->my_conn)){
-                if($stmt = $this->my_conn->prepare("SELECT `fid`,`sid`,`avg`, `count` FROM `ques` WHERE `br_code`=? AND `year`=? AND `sem`=? AND `regulation`=? AND `cr_code`=? AND `feed_id`=?;")){
+                if($stmt = $this->my_conn->prepare("SELECT `fid`,`sid`,`avg`, `count` FROM `ques` WHERE `br_code`=? AND `year`=? AND `sem`=? AND `regulation`=? AND `cr_code`=? AND `feed_id`=? ORDER BY `avg` DESC;")){
                     $stmt->bind_param("dssssd", $br_code, $year, $sem, $reg, $cr_code, $feed_id);
                     if($stmt->execute()){
                         $stmt->bind_result($facname, $subname, $avg, $count);
@@ -654,6 +675,31 @@
                         while($stmt->fetch()){
                             $result[$i]['facname'] = $facname;
                             $result[$i]['subname'] = $subname;
+                            $result[$i]['avg'] = $avg;
+                            $result[$i]['count'] = $count;
+                            $i++;
+                        }
+                    }
+                }
+            }
+            return $result;
+        }
+
+        function getSemWiseReport($sem){
+            $result = array();
+            $branchmap = $this->branchBrCodesMap();
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `fid`,`sid`, `br_code`, `year`, `regulation`, `avg`, `count` FROM `ques` WHERE `sem`=? ORDER BY `avg` DESC;")){
+                    $stmt->bind_param("s", $sem);
+                    if($stmt->execute()){
+                        $stmt->bind_result($facname, $subname, $br_code, $year, $reg, $avg, $count);
+                        $i=0;
+                        while($stmt->fetch()){
+                            $result[$i]['facname'] = $facname;
+                            $result[$i]['subname'] = $subname;
+                            $result[$i]['branch'] = $branchmap[$br_code];
+                            $result[$i]['year'] = $year;
+                            $result[$i]['reg'] = $reg;
                             $result[$i]['avg'] = $avg;
                             $result[$i]['count'] = $count;
                             $i++;
@@ -728,6 +774,39 @@
             }
             return $comments;
         }
+
+        function getStrength($feed_id, $facname, $subject){
+            $totalstd = 0; 
+            $br_code = 0;
+            $year = "";
+            $sem = "";           
+            if($this->my_error == 0 && !empty($this->my_conn)){
+                if($stmt = $this->my_conn->prepare("SELECT `br_code`, `year`, `sem`, `regulation` FROM `ques` WHERE `feed_id`=? AND `fid`=? AND `sid`=?;")){
+                    $stmt->bind_param("dss", $feed_id, $facname, $subject);
+                    if($stmt->execute()){
+                        $stmt->bind_result($br_code, $year, $sem, $reg);
+                        while($stmt->fetch()){
+                            $br_code = $br_code;
+                            $year = $year;
+                            $sem = $sem;
+                            $reg = $reg;
+                        }
+                    }
+                }
+
+                if($stmt = $this->my_conn->prepare("SELECT COUNT(*) FROM `st_login` WHERE `br_code`=? AND `year`=? AND `sem`=? AND `regulation`=?;")){
+                    $stmt->bind_param("dssd", $br_code, $year, $sem, $reg);
+                    if($stmt->execute()){
+                        $stmt->bind_result($count);
+                        while($stmt->fetch()){
+                            $totalstd = $count;
+                        }
+                    }
+                }
+            }
+            return $totalstd;
+        }
+
 
     }
 

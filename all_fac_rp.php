@@ -56,8 +56,7 @@
                     }
                 ?>
             </div>
-            <div class="card cards content text-center mt-5" style="max-width:500px;">
-                
+            <div class="card cards content text-center mt-5 mb-5" style="max-width:500px;">
                 <div class="card-header" style="font-weight: bold;">Select The Following</div>
                 <div class="card-body">
                     <form action="allfacpdf.php" roll="form" method="POST">
@@ -110,6 +109,12 @@
                         <button type="submit" class="btn btn-primary sb-btn px-5">Download Individual Reports</button>
                     </form>
                 </div>
+            </div>
+            <div class="container bg-light m-0 py-3">
+                <form action="allfacsempdf.php" class="d-flex justify-content-between rounded" method="POST">
+                    <button type="submit" class="btn btn-primary sb-btn px-5" name="sembtn" value="I">Download 1st Sem Report</button>
+                    <button type="submit" class="btn btn-primary sb-btn px-5" name="sembtn" value="II">Download 2nd Sem Report</button>
+                </form>
             </div>
         </div>
         

@@ -8,13 +8,13 @@
         // connection
         require("Operations.php");
         $opt = new Operations();
-
+        
         // deactivate feedback
         if(!empty($_POST['feed_id'])){
             $feed_id = $_POST['feed_id'];
             
-            $msg = $opt->deactive($today, $feed_id);
-
+            $msg = $opt->deactivate($today, $feed_id);
+            
         }
         
         // get active feedbacks

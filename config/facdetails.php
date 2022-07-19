@@ -37,7 +37,7 @@
                 <div class="mb-4 row">
                     <label class="col-sm-5 col-form-label" for="pass" style="font-weight: bold;">Password&emsp;:&emsp;</label>
                     <div class="col-sm-6">
-                        <input type="password" class="form-control" name="pass" id="pass" required value="<?php echo $details['pass']; ?>">
+                        <input type="text" class="form-control" name="pass" id="pass" required value="<?php echo $details['pass']; ?>">
                     </div>
                 </div>
                 <div class="mb-4 row">
